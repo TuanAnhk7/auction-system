@@ -1,6 +1,6 @@
 package com.auction.common.support;
-public class AuctionExcept extends Exception{
-    public AuctionException(String mesage){
+public class AuctionException extends Exception{
+    public AuctionException(String message){
         super(message);
     }
 }

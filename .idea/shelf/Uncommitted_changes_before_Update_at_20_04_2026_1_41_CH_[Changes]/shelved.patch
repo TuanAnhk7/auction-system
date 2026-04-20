@@ -1,0 +1,328 @@
+Index: common/Items/Electronics.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/Items/Electronics.java b/common/src/main/java/vn/edu/uet/models/items/Electronics.java
+rename from common/Items/Electronics.java
+rename to common/src/main/java/vn/edu/uet/models/items/Electronics.java
+--- a/common/Items/Electronics.java	(revision f3b46fcad0c09de1774392c268ebb2f6ce067052)
++++ b/common/src/main/java/vn/edu/uet/models/items/Electronics.java	(date 1776648240360)
+@@ -1,4 +1,4 @@
+-package Items;
++package vn.edu.uet.models.items;
+ public class Electronics extends Item {
+     private String brand;
+     private int warrantyMonths;
+Index: common/Items/Item.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/Items/Item.java b/common/src/main/java/vn/edu/uet/models/items/Item.java
+rename from common/Items/Item.java
+rename to common/src/main/java/vn/edu/uet/models/items/Item.java
+--- a/common/Items/Item.java	(revision f3b46fcad0c09de1774392c268ebb2f6ce067052)
++++ b/common/src/main/java/vn/edu/uet/models/items/Item.java	(date 1776649437666)
+@@ -1,6 +1,6 @@
+-package Items;
++package vn.edu.uet.models.items;
+ 
+-import common.Entity;
++import vn.edu.uet.models.Entity;
+ 
+ public abstract class Item extends Entity {
+     private String name;
+Index: common/Entity.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/Entity.java b/common/src/main/java/vn/edu/uet/models/Entity.java
+rename from common/Entity.java
+rename to common/src/main/java/vn/edu/uet/models/Entity.java
+--- a/common/Entity.java	(revision f3b46fcad0c09de1774392c268ebb2f6ce067052)
++++ b/common/src/main/java/vn/edu/uet/models/Entity.java	(date 1776647949849)
+@@ -1,4 +1,4 @@
+-package common;
++package vn.edu.uet.models;
+ 
+ import java.util.Date;
+ import java.util.UUID;
+Index: common/Support/AuctionClosedException.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/Support/AuctionClosedException.java b/common/src/main/java/vn/edu/uet/support/AuctionClosedException.java
+rename from common/Support/AuctionClosedException.java
+rename to common/src/main/java/vn/edu/uet/support/AuctionClosedException.java
+--- a/common/Support/AuctionClosedException.java	(revision f3b46fcad0c09de1774392c268ebb2f6ce067052)
++++ b/common/src/main/java/vn/edu/uet/support/AuctionClosedException.java	(date 1776649779674)
+@@ -1,5 +1,5 @@
+-package com.auction.common.support;
+-public class AuctionClosedException extends com.auction.common.support.AuctionException {
++package vn.edu.uet.support;
++public class AuctionClosedException extends AuctionException {
+     public AuctionClosedException(String message){
+         super(message);
+     }
+Index: common/Support/AuctionException.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/Support/AuctionException.java b/common/src/main/java/vn/edu/uet/support/AuctionException.java
+rename from common/Support/AuctionException.java
+rename to common/src/main/java/vn/edu/uet/support/AuctionException.java
+--- a/common/Support/AuctionException.java	(revision f3b46fcad0c09de1774392c268ebb2f6ce067052)
++++ b/common/src/main/java/vn/edu/uet/support/AuctionException.java	(date 1776649000000)
+@@ -1,4 +1,4 @@
+-package com.auction.common.support;
++package vn.edu.uet.support;
+ public class AuctionException extends Exception{
+     public AuctionException(String message){
+         super(message);
+Index: common/Items/Art.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/Items/Art.java b/common/src/main/java/vn/edu/uet/models/items/Art.java
+rename from common/Items/Art.java
+rename to common/src/main/java/vn/edu/uet/models/items/Art.java
+--- a/common/Items/Art.java	(revision f3b46fcad0c09de1774392c268ebb2f6ce067052)
++++ b/common/src/main/java/vn/edu/uet/models/items/Art.java	(date 1776648240337)
+@@ -1,4 +1,4 @@
+-package Items;
++package vn.edu.uet.models.items;
+ public class Art extends Item {
+     private String artist;
+     private int yearCreated;
+Index: common/src/main/java/vn/edu/uet/models/business/BidTransaction.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/src/main/java/vn/edu/uet/models/business/BidTransaction.java b/common/src/main/java/vn/edu/uet/models/business/BidTransaction.java
+new file mode 100644
+--- /dev/null	(date 1776648331402)
++++ b/common/src/main/java/vn/edu/uet/models/business/BidTransaction.java	(date 1776648331402)
+@@ -0,0 +1,22 @@
++package vn.edu.uet.models.business;
++
++import vn.edu.uet.models.users.Bidder;
++import java.io.Serializable;
++import java.time.LocalDateTime;
++
++public class BidTransaction implements Serializable {
++    private Bidder bidder;
++    private double bidAmount;
++    private LocalDateTime timestamp;
++
++    public BidTransaction(Bidder bidder, double bidAmount) {
++        this.bidder = bidder;
++        this.bidAmount = bidAmount;
++        this.timestamp = LocalDateTime.now(); // Tự động lấy giờ hiện tại hệ thống
++    }
++
++    // Các hàm Getters
++    public Bidder getBidder() { return bidder; }
++    public double getBidAmount() { return bidAmount; }
++    public LocalDateTime getTimestamp() { return timestamp; }
++}
+\ No newline at end of file
+Index: common/src/main/java/vn/edu/uet/models/business/Auction.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/src/main/java/vn/edu/uet/models/business/Auction.java b/common/src/main/java/vn/edu/uet/models/business/Auction.java
+new file mode 100644
+--- /dev/null	(date 1776649963159)
++++ b/common/src/main/java/vn/edu/uet/models/business/Auction.java	(date 1776649963159)
+@@ -0,0 +1,45 @@
++package vn.edu.uet.models.business;
++
++// 1. Sửa lỗi đỏ ở Entity, Item, Bidder bằng cách import đúng địa chỉ mới
++import vn.edu.uet.models.Entity;
++import vn.edu.uet.models.items.Item;
++import vn.edu.uet.models.users.Bidder;
++import vn.edu.uet.support.AuctionStatus;
++
++import java.io.Serializable;
++import java.time.LocalDateTime;
++import java.util.ArrayList;
++import java.util.List;
++
++public class Auction extends Entity implements Serializable {
++    private Item item;
++    private double currentHighestBid;
++    private Bidder highestBidder;
++    private LocalDateTime endTime;
++    private AuctionStatus status;
++    private List<BidTransaction> bidHistory;
++
++    public Auction(Item item, LocalDateTime endTime) {
++        super();
++        this.item = item;
++        // Lấy giá khởi điểm từ item. Nếu Item.java của Vị trí 2 chưa có hàm này, hãy nhắc bạn ấy thêm vào
++        this.currentHighestBid = item.getStartingPrice();
++        this.endTime = endTime;
++        this.status = AuctionStatus.OPEN;
++        this.bidHistory = new ArrayList<>();
++    }
++
++    public void addBid(BidTransaction transaction) {
++        this.bidHistory.add(transaction);
++        this.currentHighestBid = transaction.getBidAmount();
++        this.highestBidder = transaction.getBidder();
++    }
++
++    // Getters
++    public Item getItem() { return item; }
++    public double getCurrentHighestBid() { return currentHighestBid; }
++    public Bidder getHighestBidder() { return highestBidder; }
++    public AuctionStatus getStatus() { return status; }
++    public void setStatus(AuctionStatus status) { this.status = status; }
++    public List<BidTransaction> getBidHistory() { return bidHistory; }
++}
+\ No newline at end of file
+Index: common/src/main/java/vn/edu/uet/models/business/AuctionManager.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/src/main/java/vn/edu/uet/models/business/AuctionManager.java b/common/src/main/java/vn/edu/uet/models/business/AuctionManager.java
+new file mode 100644
+--- /dev/null	(date 1776648444487)
++++ b/common/src/main/java/vn/edu/uet/models/business/AuctionManager.java	(date 1776648444487)
+@@ -0,0 +1,39 @@
++package vn.edu.uet.models.business;
++
++import java.util.ArrayList;
++import java.util.List;
++
++public class AuctionManager {
++    // 1. Biến static lưu trữ thể hiện duy nhất của class
++    // Dùng volatile để chuẩn bị cho phần Đa luồng (Concurrency) ở Tuần 7
++    private static volatile AuctionManager instance;
++
++    // Danh sách lưu trữ tất cả các phiên đấu giá trên hệ thống
++    private List<Auction> activeAuctions;
++
++    // 2. Constructor BẮT BUỘC phải là private để không ai bên ngoài có thể gọi `new AuctionManager()`
++    private AuctionManager() {
++        this.activeAuctions = new ArrayList<>();
++    }
++
++    // 3. Hàm static để lấy ra thể hiện duy nhất (Double-checked locking an toàn cho Đa luồng)
++    public static AuctionManager getInstance() {
++        if (instance == null) {
++            synchronized (AuctionManager.class) {
++                if (instance == null) {
++                    instance = new AuctionManager();
++                }
++            }
++        }
++        return instance;
++    }
++
++    // Các hàm nghiệp vụ quản lý danh sách đấu giá
++    public void addAuction(Auction auction) {
++        activeAuctions.add(auction);
++    }
++
++    public List<Auction> getActiveAuctions() {
++        return activeAuctions;
++    }
++}
+\ No newline at end of file
+Index: common/src/main/java/vn/edu/uet/models/users/User.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/src/main/java/vn/edu/uet/models/users/User.java b/common/src/main/java/vn/edu/uet/models/users/User.java
+new file mode 100644
+--- /dev/null	(date 1776650208645)
++++ b/common/src/main/java/vn/edu/uet/models/users/User.java	(date 1776650208645)
+@@ -0,0 +1,4 @@
++package vn.edu.uet.models.users;
++
++public class User {
++}
+Index: common/src/main/java/vn/edu/uet/models/users/Bidder.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/src/main/java/vn/edu/uet/models/users/Bidder.java b/common/src/main/java/vn/edu/uet/models/users/Bidder.java
+new file mode 100644
+--- /dev/null	(date 1776650232965)
++++ b/common/src/main/java/vn/edu/uet/models/users/Bidder.java	(date 1776650232965)
+@@ -0,0 +1,4 @@
++package vn.edu.uet.models.users;
++
++public class Bidder {
++}
+Index: common/src/main/java/vn/edu/uet/models/users/Seller.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/src/main/java/vn/edu/uet/models/users/Seller.java b/common/src/main/java/vn/edu/uet/models/users/Seller.java
+new file mode 100644
+--- /dev/null	(date 1776650248993)
++++ b/common/src/main/java/vn/edu/uet/models/users/Seller.java	(date 1776650248993)
+@@ -0,0 +1,4 @@
++package vn.edu.uet.models.users;
++
++public class Seller {
++}
+Index: common/src/main/java/vn/edu/uet/models/users/Admin.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/src/main/java/vn/edu/uet/models/users/Admin.java b/common/src/main/java/vn/edu/uet/models/users/Admin.java
+new file mode 100644
+--- /dev/null	(date 1776650265306)
++++ b/common/src/main/java/vn/edu/uet/models/users/Admin.java	(date 1776650265306)
+@@ -0,0 +1,4 @@
++package vn.edu.uet.models.users;
++
++public class Admin {
++}
+Index: common/Support/AuctionStatus.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/Support/AuctionStatus.java b/common/src/main/java/vn/edu/uet/support/AuctionStatus.java
+rename from common/Support/AuctionStatus.java
+rename to common/src/main/java/vn/edu/uet/support/AuctionStatus.java
+--- a/common/Support/AuctionStatus.java	(revision f3b46fcad0c09de1774392c268ebb2f6ce067052)
++++ b/common/src/main/java/vn/edu/uet/support/AuctionStatus.java	(date 1776649000042)
+@@ -1,4 +1,4 @@
+-package com.auction.common.support;
++package vn.edu.uet.support;
+ public enum AuctionStatus{
+     Open,
+     Running,
+Index: common/Support/InvalidBidException.java
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/common/Support/InvalidBidException.java b/common/src/main/java/vn/edu/uet/support/InvalidBidException.java
+rename from common/Support/InvalidBidException.java
+rename to common/src/main/java/vn/edu/uet/support/InvalidBidException.java
+--- a/common/Support/InvalidBidException.java	(revision f3b46fcad0c09de1774392c268ebb2f6ce067052)
++++ b/common/src/main/java/vn/edu/uet/support/InvalidBidException.java	(date 1776649000026)
+@@ -1,4 +1,4 @@
+-package com.auction.common.support;
++package vn.edu.uet.support;
+ 
+ public class InvalidBidException extends com.auction.common.support.AuctionException {
+     public InvalidBidException(String message){

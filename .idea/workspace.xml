@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="cb69a275-d8da-4bad-af8d-135e8721f859" name="Changes" comment="Base code:module:common,client,sever">
+      <change afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/business/Auction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/business/AuctionManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/business/BidTransaction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/Entity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Items/Art.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/items/Art.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Items/Electronics.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/items/Electronics.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Items/Item.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/items/Item.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Support/AuctionClosedException.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/support/AuctionClosedException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Support/AuctionException.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/support/AuctionException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Support/AuctionStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/support/AuctionStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Support/InvalidBidException.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/support/InvalidBidException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Admin.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/user/Admin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Bidder.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/user/Bidder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/user/Entity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Seller.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/user/Seller.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/user/User.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;TuanAnhk7&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/TuanAnhk7/auction-system.git&quot;,
+    &quot;accountId&quot;: &quot;c185121f-7a51-4117-8f2c-ab33b79807f8&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="3C3irTSrZDsmsHbPSpY3XgqDURe" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "git-widget-placeholder": "main",
+    "kotlin-language-version-configured": "true",
+    "onboarding.tips.debug.path": "D:/baitaplaptrinhnangcao/BaiTapLon/common/business/src/Main.java"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\baitaplaptrinhnangcao\BaiTapLon\common\src\main\java" />
+      <recent name="D:\baitaplaptrinhnangcao\BaiTapLon\common\src\main\java\models\" />
+      <recent name="D:\baitaplaptrinhnangcao\BaiTapLon\common\src\main\java\models\user" />
+      <recent name="D:\baitaplaptrinhnangcao\BaiTapLon\common\src\main\java\vn\edu\uet\support" />
+      <recent name="D:\baitaplaptrinhnangcao\BaiTapLon\common\src\main\java\vn\edu\uet\models\items" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cb69a275-d8da-4bad-af8d-135e8721f859" name="Changes" comment="" />
+      <created>1775620852407</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1775620852407</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Base code:module:common,client,sever">
+      <option name="closed" value="true" />
+      <created>1775622415922</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1775622415922</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Base code:module:common,client,sever" />
+    <option name="LAST_COMMIT_MESSAGE" value="Base code:module:common,client,sever" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/server/src/main/java/vn/edu/uet/Main.java</url>
+          <line>13</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/client/src/main/java/vn/edu/uet/Main.java</url>
+          <line>13</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/common/business/src/Main.java</url>
+          <line>10</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

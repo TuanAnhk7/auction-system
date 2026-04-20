@@ -4,24 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb69a275-d8da-4bad-af8d-135e8721f859" name="Changes" comment="Base code:module:common,client,sever">
-      <change afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/business/Auction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/business/AuctionManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/business/BidTransaction.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/Entity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Items/Art.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/items/Art.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Items/Electronics.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/items/Electronics.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Items/Item.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/items/Item.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Support/AuctionClosedException.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/support/AuctionClosedException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Support/AuctionException.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/support/AuctionException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Support/AuctionStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/support/AuctionStatus.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Support/InvalidBidException.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/support/InvalidBidException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Admin.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/user/Admin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Bidder.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/user/Bidder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/user/Entity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Seller.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/user/Seller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/uet/models/user/User.java" afterDir="false" />
-    </list>
+    <list default="true" id="cb69a275-d8da-4bad-af8d-135e8721f859" name="Changes" comment="hoàn thành business logic và fix lỗi package" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -101,7 +84,23 @@
       <option name="project" value="LOCAL" />
       <updated>1775622415922</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="hoàn thành business logic và fix lỗi package">
+      <option name="closed" value="true" />
+      <created>1776672427424</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1776672427424</updated>
+    </task>
+    <task id="LOCAL-00003" summary="hoàn thành business logic và fix lỗi package">
+      <option name="closed" value="true" />
+      <created>1776672507463</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1776672507463</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -129,7 +128,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Base code:module:common,client,sever" />
-    <option name="LAST_COMMIT_MESSAGE" value="Base code:module:common,client,sever" />
+    <MESSAGE value="hoàn thành business logic và fix lỗi package" />
+    <option name="LAST_COMMIT_MESSAGE" value="hoàn thành business logic và fix lỗi package" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

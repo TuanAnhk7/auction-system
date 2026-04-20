@@ -1,4 +1,4 @@
-package Items;
+package uet.models.items;
 public class Electronics extends Item {
     private String brand;
     private int warrantyMonths;

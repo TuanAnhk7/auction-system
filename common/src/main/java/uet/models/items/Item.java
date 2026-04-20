@@ -1,6 +1,6 @@
-package Items;
+package uet.models.items;
 
-import common.Entity;
+import uet.Entity;
 
 public abstract class Item extends Entity {
     private String name;
@@ -9,7 +9,7 @@ public abstract class Item extends Entity {
     private double currentPrice;
 
     public Item(String name, String description, double startingPrice) {
-        super(); // Gọi Constructor của Entity để tạo ID/Time
+        super(); // Gọi Constructor của uet.Entity để tạo ID/Time
         this.name = name;
         this.description = description;
         this.startingPrice = startingPrice;
@@ -24,4 +24,10 @@ public abstract class Item extends Entity {
     public String getName() { return name; }
     public double getCurrentPrice() { return currentPrice; }
     public void setCurrentPrice(double currentPrice) { this.currentPrice = currentPrice; }
+
+
+    public double getStartingPrice() {
+        return startingPrice;
+    }
 }
+

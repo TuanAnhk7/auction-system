@@ -1,4 +1,4 @@
-package com.auction.common.model.user;
+package uet.models.user;
 
 public class Bidder extends User {
     private double accountBalance;

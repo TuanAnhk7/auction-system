@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane prefHeight="600.0" prefWidth="800.0"
+            xmlns="http://javafx.com/javafx/8"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="client.controllers.AuctionListController"> <!-- Chú ý dấu đóng ngoặc > này -->
+  <top>
+    <Label text="DANH SÁCH VẬT PHẨM ĐẤU GIÁ" style="-fx-font-size: 20px; -fx-padding: 10;" BorderPane.alignment="CENTER" />
+  </top>
+  <center>
+    <TableView fx:id="auctionTable">
+      <columns>
+        <TableColumn fx:id="itemNameColumn" prefWidth="300.0" text="Tên vật phẩm" />
+        <TableColumn fx:id="priceColumn" prefWidth="200.0" text="Giá hiện tại" />
+        <TableColumn prefWidth="200.0" text="Thời gian còn lại" />
+      </columns>
+    </TableView>
+  </center>
+  <bottom>
+    <HBox alignment="CENTER" spacing="20" style="-fx-padding: 15;">
+      <Button text="Đấu giá" onAction="#handleBid" />
+      <Button text="Làm mới" />
+    </HBox>
+  </bottom>
+</BorderPane>

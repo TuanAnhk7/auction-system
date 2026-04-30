@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+</html>
+
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="vn.edu.uet.client.controllers.MainController">
+  <children>
+    <Label layoutX="240.0" layoutY="40.0" text="HỆ THỐNG ĐẤU GIÁ" style="-fx-font-weight: bold;"/>
+    <Button layoutX="270.0" layoutY="200.0" mnemonicParsing="UTF-8" text="Bắt đầu" />
+  </children>
+</AnchorPane>

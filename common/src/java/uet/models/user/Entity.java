@@ -1,4 +1,4 @@
-package uet.models.user;
+package src.java.uet.models.user;
 
 import java.io.Serializable;
 import java.util.Date;

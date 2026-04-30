@@ -1,4 +1,4 @@
-package uet.models.user;
+package src.java.uet.models.user;
 
 public abstract class User extends Entity {
     private String username;

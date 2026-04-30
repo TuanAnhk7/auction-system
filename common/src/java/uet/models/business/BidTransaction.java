@@ -1,6 +1,6 @@
-package uet.models.business;
+package src.java.uet.models.business;
 
-import uet.models.user.Bidder;
+import src.java.uet.models.user.Bidder;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

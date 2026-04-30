@@ -1,9 +1,9 @@
-package uet.models.business;
+package src.java.uet.models.business;
 
-import uet.models.user.Entity;
-import uet.models.items.Item;
-import uet.models.user.Bidder;
-import uet.support.AuctionStatus;
+import src.java.uet.models.user.Entity;
+import src.java.uet.models.items.Item;
+import src.java.uet.models.user.Bidder;
+import src.java.uet.support.AuctionStatus;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

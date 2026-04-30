@@ -1,4 +1,4 @@
-package uet.models.user;
+package src.java.uet.models.user;
 
 public class Bidder extends User {
     private double accountBalance;

@@ -1,6 +1,6 @@
-package uet.models.items;
+package src.java.uet.models.items;
 
-import uet.Entity;
+import src.java.uet.Entity;
 
 public abstract class Item extends Entity {
     private String name;

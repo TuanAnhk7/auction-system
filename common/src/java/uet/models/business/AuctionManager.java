@@ -27,6 +27,15 @@ public class AuctionManager {
         return instance;
     }
 
+    public Auction getAuctionById(String id) {
+        for (Auction auction : activeAuctions) {
+            if (auction.getId().equals(id)) {
+                return auction;
+            }
+        }
+        return null;
+    }
+
     // Các hàm nghiệp vụ quản lý danh sách đấu giá
     public void addAuction(Auction auction) {
         activeAuctions.add(auction);

@@ -32,4 +32,5 @@ public class AuctionListController {
         // Xử lý khi người dùng nhấn nút Đấu giá
         System.out.println("Đã gửi yêu cầu đấu giá!");
     }
+
 }

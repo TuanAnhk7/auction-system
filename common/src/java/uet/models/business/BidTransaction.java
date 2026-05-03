@@ -20,4 +20,12 @@ public class BidTransaction implements Serializable {
     public Bidder getBidder() { return bidder; }
     public double getBidAmount() { return bidAmount; }
     public LocalDateTime getTimestamp() { return timestamp; }
+
+    public String toString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        return String.format("[%s] %s đã đặt: %.2f",
+                timestamp.format(formatter),
+                bidder.getUsername(), // Giả sử lớp Bidder có hàm getUsername
+                bidAmount);
+    }
 }

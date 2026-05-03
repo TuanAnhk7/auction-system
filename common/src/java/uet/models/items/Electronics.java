@@ -1,4 +1,4 @@
-package Items;
+package src.java.uet.models.items;
 public class Electronics extends Item {
     private String brand;
     private int warrantyMonths;

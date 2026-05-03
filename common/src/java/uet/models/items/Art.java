@@ -1,4 +1,4 @@
-package Items;
+package src.java.uet.models.items;
 public class Art extends Item {
     private String artist;
     private int yearCreated;

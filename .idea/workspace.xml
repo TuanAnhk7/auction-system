@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="cb69a275-d8da-4bad-af8d-135e8721f859" name="Changes" comment="giao diện cơ bản (login, danh sách)">
+      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/main/java/client/MainClient.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/main/java/client/controllers/AuctionListController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/main/java/client/controllers/LoginController.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/main/resources/client/views/auction-list-view.fxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/main/resources/client/views/login-view.fxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/client/src/main/resources/client/views/main-.fxml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/src/java/uet/models/business/Auction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/src/java/uet/models/business/AuctionManager.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/src/java/uet/models/business/BidTransaction.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/src/java/uet/support/AuctionClosedException.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/src/java/uet/support/InvalidBidException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/client/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/Entity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Items/Art.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/items/Art.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Items/Electronics.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/items/Electronics.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Items/Item.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/items/Item.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Support/AuctionClosedException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Support/AuctionException.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/support/AuctionException.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Support/AuctionStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/support/AuctionStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/Support/InvalidBidException.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Admin.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/user/Admin.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Bidder.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/user/Bidder.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/user/Entity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Seller.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/user/Seller.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/user/User.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ChangesViewManager">
+    <option name="groupingKeys">
+      <option value="module" />
+      <option value="repository" />
+    </option>
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="HTML File" />
+        <option value="Class" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;TuanAnhk7&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/TuanAnhk7/auction-system.git",
+    "accountId": "d97e989d-8b5b-4b40-b941-d9e9197ec15a"
+  }
+}]]></component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;customColor&quot;: &quot;&quot;,
+  &quot;associatedIndex&quot;: 8
+}</component>
+  <component name="ProjectId" id="3C3irTSrZDsmsHbPSpY3XgqDURe" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "Application.MainClient.executor": "Run",
+    "Application.client.MainClient.executor": "Run",
+    "DefaultHtmlFileTemplate": "HTML File",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.MCP Project settings loaded": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
+    "git-widget-placeholder": "Merging main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "kotlin-language-version-configured": "true",
+    "onboarding.tips.debug.path": "D:/baitaplaptrinhnangcao/BaiTapLon/common/business/src/Main.java",
+    "settings.editor.selected.configurable": "preferences.JavaFX",
+    "to.speed.mode.migration.done": "true"
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\baitaplaptrinhnangcao\BaiTapLon\common\src\main\java" />
+      <recent name="D:\baitaplaptrinhnangcao\BaiTapLon\common\src\main\java\models\" />
+      <recent name="D:\baitaplaptrinhnangcao\BaiTapLon\common\src\main\java\models\user" />
+      <recent name="D:\baitaplaptrinhnangcao\BaiTapLon\common\src\main\java\vn\edu\uet\support" />
+      <recent name="D:\baitaplaptrinhnangcao\BaiTapLon\common\src\main\java\vn\edu\uet\models\items" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="client.MainClient" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="client.MainClient" />
+      <module name="client" />
+      <option name="VM_PARAMETERS" value="--module-path $USER_HOME$/Documents/javafx-sdk-26/lib --add-modules javafx.controls,javafx.fxml" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="client.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Application.client.MainClient" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-jdk-30f59d01ecdd-2fc7cc6b9a17-intellij.indexing.shared.core-IU-253.31033.145" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="cb69a275-d8da-4bad-af8d-135e8721f859" name="Changes" comment="" />
+      <created>1775620852407</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1775620852407</updated>
+    </task>
+    <task id="LOCAL-00001" summary="Base code:module:common,client,sever">
+      <option name="closed" value="true" />
+      <created>1775622415922</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1775622415922</updated>
+    </task>
+    <task id="LOCAL-00002" summary="hoàn thành business logic và fix lỗi package">
+      <option name="closed" value="true" />
+      <created>1776672427424</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1776672427424</updated>
+    </task>
+    <task id="LOCAL-00003" summary="hoàn thành business logic và fix lỗi package">
+      <option name="closed" value="true" />
+      <created>1776672507463</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1776672507463</updated>
+    </task>
+    <task id="LOCAL-00004" summary="giao diện cơ bản (login, danh sách)">
+      <option name="closed" value="true" />
+      <created>1777567361202</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1777567361202</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="origin/main" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Base code:module:common,client,sever" />
+    <MESSAGE value="hoàn thành business logic và fix lỗi package" />
+    <MESSAGE value="feat: create basic AuctionServer and ClientHandler for networking" />
+    <MESSAGE value="giao diện cơ bản (login, danh sách)" />
+    <option name="LAST_COMMIT_MESSAGE" value="giao diện cơ bản (login, danh sách)" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/server/src/main/java/vn/edu/uet/Main.java</url>
+          <line>13</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/client/src/main/java/vn/edu/uet/Main.java</url>
+          <line>13</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="java-line">
+          <url>file://$PROJECT_DIR$/common/business/src/Main.java</url>
+          <line>10</line>
+          <option name="timeStamp" value="5" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+  <component name="XSLT-Support.FileAssociations.UIState">
+    <expand />
+    <select />
+  </component>
+</project>

@@ -1,4 +1,4 @@
-package com.auction.common.model.user;
+package src.java.uet.models.user;
 
 import java.io.Serializable;
 import java.util.Date;

@@ -1,4 +1,4 @@
-package src.java.uet.support;
+package uet.support;
 
 public class InvalidBidException extends AuctionException {
     public InvalidBidException(String message){

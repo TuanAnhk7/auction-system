@@ -1,4 +1,4 @@
-package src.java.uet.models.user;
+package uet.models.user;
 
 public class Admin extends User {
     private String[] privileges;

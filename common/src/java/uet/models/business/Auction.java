@@ -1,14 +1,16 @@
-package src.java.uet.models.business;
+package uet.models.business;
 
-import src.java.uet.models.user.Entity;
-import src.java.uet.models.items.Item;
-import src.java.uet.models.user.Bidder;
-import src.java.uet.support.AuctionStatus;
+import uet.models.user.Entity;
+import uet.models.items.Item;
+import uet.models.user.Bidder;
+import uet.support.AuctionStatus;
+import uet.support.InvalidBidException;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 
 public class Auction extends Entity implements Serializable {
     private Item item;
@@ -29,19 +31,19 @@ public class Auction extends Entity implements Serializable {
         this.bidHistory = new ArrayList<>();
     }
 
-    public synchronized void placeBid(Bidder bidder, double amount) throws InvalidBidException {
+    public synchronized void placeBid(Bidder bidder, double bidAmount) throws InvalidBidException {
         if (this.status != AuctionStatus.Running) {
             throw new InvalidBidException("Phiên đấu giá đang đóng.");
         }
 
-        if (amount <= currentHighestBid) {
+        if (bidAmount <= currentHighestBid) {
             throw new InvalidBidException("Giá đặt phải cao hơn giá hiện tại!");
         }
 
         // Thay thế logic của addBid cũ
-        this.currentHighestBid = amount;
+        this.currentHighestBid = bidAmount;
         this.highestBidder = bidder;
-        this.bidHistory.add(new BidTransaction(bidder, amount, LocalDateTime.now()));
+        this.bidHistory.add(new BidTransaction(bidder, bidAmount, LocalDateTime.now()));
 
         notifyObservers();//báo interface để cập nhật số
     }

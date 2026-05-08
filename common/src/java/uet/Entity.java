@@ -1,4 +1,4 @@
-package src.java.uet;
+package uet;
 
 import java.util.Date;
 import java.util.UUID;

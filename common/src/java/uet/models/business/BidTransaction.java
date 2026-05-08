@@ -1,16 +1,16 @@
-package src.java.uet.models.business;
+package uet.models.business;
 
-import src.java.uet.models.user.Bidder;
-
+import uet.models.user.Bidder;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class BidTransaction implements Serializable {
     private Bidder bidder;
     private double bidAmount;
     private LocalDateTime timestamp;
 
-    public BidTransaction(Bidder bidder, double bidAmount) {
+    public BidTransaction(Bidder bidder, double bidAmount, LocalDateTime timestamp ) {
         this.bidder = bidder;
         this.bidAmount = bidAmount;
         this.timestamp = LocalDateTime.now(); // Tự động lấy giờ hiện tại hệ thống

@@ -1,4 +1,4 @@
-package src.java.uet.support;
+package uet.support;
 public enum AuctionStatus{
     Open,
     Running,

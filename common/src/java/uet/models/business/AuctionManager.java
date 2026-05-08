@@ -1,4 +1,4 @@
-package src.java.uet.models.business;
+package uet.models.business;
 
 import java.util.ArrayList;
 import java.util.List;

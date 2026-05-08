@@ -1,4 +1,4 @@
-package src.java.uet.models.user;
+package uet.models.user;
 
 import java.util.List;
 

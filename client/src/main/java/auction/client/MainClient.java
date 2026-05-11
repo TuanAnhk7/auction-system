@@ -13,7 +13,7 @@ public class MainClient extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         stg = stage;
-        stage.setResizable(false);
+        stage.setResizable(true);
 
         // Màn hình đầu tiên hiện lên sẽ là trang chao
         showMainView();

@@ -5,39 +5,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb69a275-d8da-4bad-af8d-135e8721f859" name="Changes" comment="giao diện cơ bản (login, danh sách)">
-      <change afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/jarRepositories.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/src/main/java/client/MainClient.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/src/main/java/client/controllers/AuctionListController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/src/main/java/client/controllers/LoginController.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/src/main/resources/client/views/auction-list-view.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/src/main/resources/client/views/login-view.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/client/src/main/resources/client/views/main-.fxml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/common/src/java/uet/models/business/Auction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/common/src/java/uet/models/business/AuctionManager.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/common/src/java/uet/models/business/BidTransaction.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/common/src/java/uet/support/AuctionClosedException.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/common/src/java/uet/support/InvalidBidException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/client/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/Entity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Items/Art.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/items/Art.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Items/Electronics.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/items/Electronics.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Items/Item.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/items/Item.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Support/AuctionClosedException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Support/AuctionException.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/support/AuctionException.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Support/AuctionStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/support/AuctionStatus.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/Support/InvalidBidException.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Admin.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/user/Admin.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Bidder.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/user/Bidder.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Entity.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/user/Entity.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/Seller.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/user/Seller.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/src/main/java/com/auction/common/model/user/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/java/uet/models/user/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/pom.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/AuctionObserver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/java/uet/models/items/Art.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/Auction.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/Auction.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,6 +20,9 @@
       <option value="module" />
       <option value="repository" />
     </option>
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="51" />
   </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
@@ -67,12 +41,12 @@
     &quot;assignee&quot;: &quot;TuanAnhk7&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/TuanAnhk7/auction-system.git",
-    "accountId": "d97e989d-8b5b-4b40-b941-d9e9197ec15a"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/TuanAnhk7/auction-system.git&quot;,
+    &quot;accountId&quot;: &quot;2cbe96b2-df1e-45eb-b0ad-17f7def906d9&quot;
   }
-}]]></component>
+}</component>
   <component name="McpProjectServerCommands">
     <commands />
     <urls />
@@ -82,6 +56,9 @@
   &quot;associatedIndex&quot;: 8
 }</component>
   <component name="ProjectId" id="3C3irTSrZDsmsHbPSpY3XgqDURe" />
+  <component name="ProjectLevelVcsManager">
+    <OptionsSetting value="false" id="Update" />
+  </component>
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
@@ -89,7 +66,7 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Application.MainClient.executor": "Run",
-    "Application.client.MainClient.executor": "Run",
+    "Application.client.MainClient.executor": "Coverage",
     "DefaultHtmlFileTemplate": "HTML File",
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "RunOnceActivity.MCP Project settings loaded": "true",
@@ -97,11 +74,14 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
-    "git-widget-placeholder": "Merging main",
+    "git-widget-placeholder": "main",
     "junie.onboarding.icon.badge.shown": "true",
     "kotlin-language-version-configured": "true",
     "onboarding.tips.debug.path": "D:/baitaplaptrinhnangcao/BaiTapLon/common/business/src/Main.java",
-    "settings.editor.selected.configurable": "preferences.JavaFX",
+    "project.structure.last.edited": "Libraries",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "settings.editor.selected.configurable": "ml.llm.AcpAgentsConfigurable",
     "to.speed.mode.migration.done": "true"
   }
 }]]></component>
@@ -115,10 +95,10 @@
     </key>
   </component>
   <component name="RunManager">
-    <configuration name="client.MainClient" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
-      <option name="MAIN_CLASS_NAME" value="client.MainClient" />
+    <configuration name="MainClient" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="auction.client.MainClient" />
       <module name="client" />
-      <option name="VM_PARAMETERS" value="--module-path $USER_HOME$/Documents/javafx-sdk-26/lib --add-modules javafx.controls,javafx.fxml" />
+      <option name="VM_PARAMETERS" value="--module-path C:\Users\Hello\Downloads\openjfx-25.0.2_windows-x64_bin-sdk\javafx-sdk-25.0.2\lib --add-modules javafx.controls,javafx.fxml" />
       <extension name="coverage">
         <pattern>
           <option name="PATTERN" value="client.*" />
@@ -131,7 +111,7 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.client.MainClient" />
+        <item itemvalue="Application.MainClient" />
       </list>
     </recent_temporary>
   </component>
@@ -239,5 +219,10 @@
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />
     <select />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/auction_system$client_MainClient.ic" NAME="client.MainClient Coverage Results" MODIFIED="1778460419442" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="idea" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="true">
+      <FILTER>client.*</FILTER>
+    </SUITE>
   </component>
 </project>

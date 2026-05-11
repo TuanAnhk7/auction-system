@@ -16,6 +16,10 @@ public class BidTransaction implements Serializable {
         this.timestamp = LocalDateTime.now();
     }
 
+    public double getAmount() {
+        return this.bidAmount;
+    }
+
     public Bidder getBidder() {
         return bidder;
     }

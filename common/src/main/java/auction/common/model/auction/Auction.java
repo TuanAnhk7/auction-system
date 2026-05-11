@@ -19,12 +19,30 @@ public class Auction extends BaseEntity {
     private Bidder highestBidder;
     private AuctionStatus status;
 
+    private final List<AuctionObserver> observers = new ArrayList<>();//quản lí ng nghe
+
     public Auction(Item item, LocalDateTime endTime) {
         this.item = item;
         this.endTime = endTime;
         this.bidHistory = new ArrayList<>();
         this.currentHighestBid = item.getStartingPrice();
         this.status = AuctionStatus.OPEN;
+    }
+
+    public synchronized void addObserver(AuctionObserver observer) {
+        if (!observers.contains(observer)) {
+            observers.add(observer);
+        }
+    }
+    public synchronized void removeObserver(AuctionObserver observer) {
+        observers.remove(observer);
+    }
+
+    private void notifyObservers(BidTransaction transaction) {
+        for (AuctionObserver observer : observers) {
+            // Thông báo cho từng observer về giao dịch mới nhất
+            observer.updatePrice(transaction.getAmount());
+        }
     }
 
     public synchronized BidTransaction placeBid(Bidder bidder, double bidAmount)
@@ -46,6 +64,7 @@ public class Auction extends BaseEntity {
         highestBidder = bidder;
         item.updateCurrentPrice(bidAmount);
         touch();
+        notifyObservers(transaction);
         return transaction;
     }
 

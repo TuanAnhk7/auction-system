@@ -1,5 +1,6 @@
 package auction.client;
 
+import auction.client.network.AuctionClient;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -37,5 +38,10 @@ public class MainClient extends Application {
 
     public static void main(String[] args) {
         launch();
+    }
+
+    @Override
+    public void stop() {
+        AuctionClient.getInstance().close();
     }
 }

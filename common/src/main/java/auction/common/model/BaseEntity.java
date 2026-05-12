@@ -10,7 +10,11 @@ public abstract class BaseEntity implements Serializable {
     private Instant updatedAt;
 
     protected BaseEntity() {
-        this.id = UUID.randomUUID().toString();
+        this(UUID.randomUUID().toString());
+    }
+
+    protected BaseEntity(String id) {
+        this.id = id;
         this.createdAt = Instant.now();
         this.updatedAt = createdAt;
     }

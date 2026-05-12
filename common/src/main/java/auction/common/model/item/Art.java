@@ -5,7 +5,11 @@ public class Art extends Item {
     private final int yearCreated;
 
     public Art(String name, String description, double startingPrice, String artist, int yearCreated) {
-        super(name, description, startingPrice);
+        this(java.util.UUID.randomUUID().toString(), name, description, startingPrice, artist, yearCreated);
+    }
+
+    public Art(String itemId, String name, String description, double startingPrice, String artist, int yearCreated) {
+        super(itemId, name, description, startingPrice);
         this.artist = artist;
         this.yearCreated = yearCreated;
     }

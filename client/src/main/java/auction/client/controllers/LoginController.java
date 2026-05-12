@@ -1,5 +1,6 @@
 package auction.client.controllers;
 
+import auction.client.ClientSession;
 import auction.client.MainClient;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -38,6 +39,7 @@ public class LoginController {
         }
 
         System.out.println("Đang đăng nhập cho user: " + username);
+        ClientSession.setUsername(username);
 
         try {
             MainClient.changeScene("auction-list-view.fxml");

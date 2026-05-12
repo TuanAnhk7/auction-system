@@ -1,9 +1,9 @@
 package auction.common.model.auction;
 
 public enum AuctionStatus {
-    DRAFT,
     OPEN,
-    CLOSED,
+    RUNNING,
+    FINISHED,
     PAID,
     CANCELED
 }

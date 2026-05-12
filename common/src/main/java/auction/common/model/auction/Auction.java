@@ -1,5 +1,6 @@
 package auction.common.model.auction;
 
+import auction.common.exception.AuctionException;
 import auction.common.exception.AuctionClosedException;
 import auction.common.exception.InvalidBidException;
 import auction.common.model.BaseEntity;
@@ -47,11 +48,14 @@ public class Auction extends BaseEntity {
 
     public synchronized BidTransaction placeBid(Bidder bidder, double bidAmount)
             throws AuctionClosedException, InvalidBidException {
-        if (status != AuctionStatus.OPEN || LocalDateTime.now().isAfter(endTime)) {
-            status = AuctionStatus.CLOSED;
-            throw new AuctionClosedException("Auction is closed.");
+        updateStatusIfExpired();
+        if (status == AuctionStatus.FINISHED) {
+            throw new AuctionClosedException("Auction has finished.");
         }
-        if (bidAmount <= currentHighestBid) {
+        if (status != AuctionStatus.RUNNING) {
+            throw new AuctionClosedException("Auction is not accepting bids.");
+        }
+        if (bidAmount <= item.getCurrentPrice()) {
             throw new InvalidBidException("Bid must be higher than the current highest bid.");
         }
         if (bidder.getAccountBalance() < bidAmount) {
@@ -68,9 +72,46 @@ public class Auction extends BaseEntity {
         return transaction;
     }
 
-    public synchronized void close() {
-        this.status = AuctionStatus.CLOSED;
+    public synchronized void startAuction() throws AuctionException {
+        ensureStatus(AuctionStatus.OPEN, "Auction can only start from OPEN status.");
+        this.status = AuctionStatus.RUNNING;
         touch();
+    }
+
+    public synchronized void finishAuction() throws AuctionException {
+        ensureStatus(AuctionStatus.RUNNING, "Auction can only finish from RUNNING status.");
+        this.status = AuctionStatus.FINISHED;
+        touch();
+    }
+
+    public synchronized void markAsPaid() throws AuctionException {
+        ensureStatus(AuctionStatus.FINISHED, "Auction can only be marked as PAID from FINISHED status.");
+        this.status = AuctionStatus.PAID;
+        touch();
+    }
+
+    public synchronized void cancel() throws AuctionException {
+        ensureStatus(AuctionStatus.FINISHED, "Auction can only be canceled from FINISHED status.");
+        this.status = AuctionStatus.CANCELED;
+        touch();
+    }
+
+    public synchronized void updateStatusIfExpired() {
+        if (status == AuctionStatus.RUNNING && LocalDateTime.now().isAfter(endTime)) {
+            this.status = AuctionStatus.FINISHED;
+            touch();
+        }
+    }
+
+    private void ensureStatus(AuctionStatus expectedStatus, String message) throws AuctionException {
+        if (status != expectedStatus) {
+            throw new AuctionException(message);
+        }
+    }
+
+    public synchronized boolean canAcceptBids() {
+        updateStatusIfExpired();
+        return status == AuctionStatus.RUNNING;
     }
 
     public Item getItem() {

@@ -9,6 +9,11 @@ public abstract class Item extends BaseEntity {
     private double currentPrice;
 
     protected Item(String name, String description, double startingPrice) {
+        this(java.util.UUID.randomUUID().toString(), name, description, startingPrice);
+    }
+
+    protected Item(String itemId, String name, String description, double startingPrice) {
+        super(itemId);
         this.name = name;
         this.description = description;
         this.startingPrice = startingPrice;

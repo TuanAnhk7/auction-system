@@ -9,34 +9,32 @@ import auction.common.model.item.Item;
 import auction.common.model.network.BidRequest;
 import auction.common.model.network.BidResponse;
 import auction.common.model.network.GetAuctionListResponse;
+
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.ListView;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 public class AuctionListController implements Observer {
-
     @FXML
     private TableView<Art> auctionTable;
-
     @FXML
     private TableColumn<Art, String> nameColumn;
-
     @FXML
     private TableColumn<Art, String> artistColumn;
-
     @FXML
     private TableColumn<Art, Integer> yearColumn;
-
     @FXML
     private TableColumn<Art, Double> priceColumn;
-
     @FXML
     private TextField bidAmountField;
+    @FXML
+    private ListView<String> bidHistoryListView;
 
     @FXML
     public void initialize() {
@@ -53,8 +51,15 @@ public class AuctionListController implements Observer {
             AuctionClient.getInstance().addObserver(this);
             AuctionClient.getInstance().requestAuctionList();
         } catch (Exception e) {
-            showError("Khong ket noi duoc den server realtime.");
+            e.printStackTrace(); // Thêm dòng này để xem lỗi chi tiết trong Console
+            showError("Lỗi kết nối Server: " + e.getMessage());
         }
+
+        auctionTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection)  -> {
+            if (newSelection != null){
+                updateDetailView(newSelection);
+            }
+        });
 
         System.out.println("Đang tải danh sách vật phẩm từ Server...");
     }
@@ -66,7 +71,6 @@ public class AuctionListController implements Observer {
             showError("Vui lòng chọn một vật phẩm để đấu giá.");
             return;
         }
-
         try {
             double bidAmount = Double.parseDouble(bidAmountField.getText().trim());
             validateBid(selectedArt, bidAmount);
@@ -85,13 +89,28 @@ public class AuctionListController implements Observer {
         }
     }
 
-    private void validateBid(Art selectedArt, double bidAmount) throws InvalidBidException {
-        if (bidAmount <= selectedArt.getCurrentPrice()) {
-            throw new InvalidBidException("Giá đặt phải lớn hơn giá hiện tại.");
+    private void updateDetailView(Art selectedArt) {
+        if (bidHistoryListView == null) {
+            System.err.println("Lỗi: bidHistoryListView chưa được kết nối từ FXML!");
+            return;
+        }
+        bidHistoryListView.getItems().clear();
+        bidHistoryListView.getItems().add("        CHI TIẾT VẬT PHẨM");
+        bidHistoryListView.getItems().add("Tên: " + selectedArt.getName());
+        bidHistoryListView.getItems().add("Họa sĩ: " + selectedArt.getArtist());
+        bidHistoryListView.getItems().add("Giá khởi điểm: " + selectedArt.getStartingPrice() + "USD");
+        bidHistoryListView.getItems().add("Giá hiện tại: " + selectedArt.getCurrentPrice() + "USD");
+        bidHistoryListView.getItems().add("        LỊCH SỬ ĐẶT GIÁ");
+
+    }
+
+    private void validateBid(Art selectedArt, double bidAmount) throws InvalidBidException {//ktra tinh hop le cua gia dat
+        if (bidAmount <= selectedArt.getCurrentPrice()){
+            throw new InvalidBidException(String.format("Giá đặt (%.2f) phải cao hơn giá hiện tại (%.2f) USD", bidAmount, selectedArt.getCurrentPrice()));
         }
     }
 
-    private void showError(String message) {
+    private void showError(String message){
         Alert alert = new Alert(Alert.AlertType.ERROR);
         alert.setTitle("Lỗi đấu giá");
         alert.setHeaderText(null);
@@ -108,15 +127,28 @@ public class AuctionListController implements Observer {
             }
 
             Item updatedItem = response.getUpdatedItem();
-            if (!(updatedItem instanceof Art updatedArt)) {
-                return;
-            }
+            if (!(updatedItem instanceof Art)) return;
+            Art updatedArt = (Art) updatedItem;
 
             for (Art art : auctionTable.getItems()) {
                 if (art.getId().equals(updatedArt.getId())) {
                     art.updateCurrentPrice(updatedArt.getCurrentPrice());
                     break;
                 }
+            }
+
+            Art selected = auctionTable.getSelectionModel().getSelectedItem();//cập nhật lịch sử nếu vật phẩm được xem chi tiết
+            if (selected != null && selected.getId().equals(updatedArt.getId())) {
+                // Xác định người đặt giá dựa trên thông điệp từ server
+                String bidderDisplay = "Người khác";
+                if (response.getMessage().contains("thành công") || 
+                    response.getMessage().contains(ClientSession.getUsername())) {
+                    bidderDisplay = "Bạn";
+                }
+                String historyEntry = String.format("[%s] vừa đặt giá mới: %.2f USD",
+                        bidderDisplay,
+                        updatedArt.getCurrentPrice());
+                bidHistoryListView.getItems().add(historyEntry);
             }
 
             auctionTable.refresh();

@@ -43,6 +43,7 @@ public class Auction extends BaseEntity {
         for (AuctionObserver observer : observers) {
             // Thông báo cho từng observer về giao dịch mới nhất
             observer.updatePrice(transaction.getAmount());
+            observer.onNewBid(transaction);
         }
     }
 
@@ -55,7 +56,7 @@ public class Auction extends BaseEntity {
         if (status != AuctionStatus.RUNNING) {
             throw new AuctionClosedException("Auction is not accepting bids.");
         }
-        if (bidAmount <= item.getCurrentPrice()) {
+        if (bidAmount <= currentHighestBid) {
             throw new InvalidBidException("Bid must be higher than the current highest bid.");
         }
         if (bidder.getAccountBalance() < bidAmount) {
@@ -91,7 +92,9 @@ public class Auction extends BaseEntity {
     }
 
     public synchronized void cancel() throws AuctionException {
-        ensureStatus(AuctionStatus.FINISHED, "Auction can only be canceled from FINISHED status.");
+        if (status == AuctionStatus.PAID){
+            throw new AuctionException("Cannot cancel auction that has already been paid.");
+        }
         this.status = AuctionStatus.CANCELED;
         touch();
     }

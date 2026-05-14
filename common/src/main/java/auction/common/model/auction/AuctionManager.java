@@ -2,14 +2,18 @@ package auction.common.model.auction;
 
 import auction.common.exception.AuctionClosedException;
 import auction.common.exception.InvalidBidException;
+import auction.common.model.item.Art;
 import auction.common.model.item.Item;
 import auction.common.model.user.Bidder;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 public class AuctionManager {
     private static volatile AuctionManager instance;
@@ -31,18 +35,34 @@ public class AuctionManager {
         return instance;
     }
 
+    public Auction createAuction(String type, String name, double startingPrice, LocalDateTime endTime, Object... extraArgs) {
+        Item item = null;
+        if ("art".equalsIgnoreCase(type) && extraArgs.length >= 2) {
+            String artist = (String) extraArgs[0];
+            int year = (int) extraArgs[1];
+            String description = "";
+            item = new Art(name, description,  startingPrice, artist, year);
+        }
+        if (item != null) {
+            Auction auction = new Auction(item, endTime);
+            addAuction(auction);
+            return auction;
+        }
+        return null;
+    }
+
     public void addAuction(Auction auction) {
         activeAuctions.put(auction.getId(), auction);
     }
 
     public List<Auction> getActiveAuctions() {
-        return List.copyOf(new ArrayList<>(activeAuctions.values()));
+        return Collections.unmodifiableList(new ArrayList<>(activeAuctions.values()));
     }
 
     public List<Item> getActiveItems() {
         return getActiveAuctions().stream()
                 .map(Auction::getItem)
-                .toList();
+                .collect(Collectors.toList());
     }
 
     public Optional<Auction> findById(String auctionId) {

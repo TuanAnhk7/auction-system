@@ -5,7 +5,11 @@ public class Electronics extends Item {
     private final int warrantyMonths;
 
     public Electronics(String name, String description, double startingPrice, String brand, int warrantyMonths) {
-        super(name, description, startingPrice);
+        this(java.util.UUID.randomUUID().toString(), name, description, startingPrice, brand, warrantyMonths);
+    }
+
+    public Electronics(String itemId, String name, String description, double startingPrice, String brand, int warrantyMonths) {
+        super(itemId, name, description, startingPrice);
         this.brand = brand;
         this.warrantyMonths = warrantyMonths;
     }

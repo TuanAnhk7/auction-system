@@ -1,5 +1,6 @@
 package auction.client;
 
+import auction.client.network.AuctionClient;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -13,7 +14,7 @@ public class MainClient extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         stg = stage;
-        stage.setResizable(false);
+        stage.setResizable(true);
 
         // Màn hình đầu tiên hiện lên sẽ là trang chao
         showMainView();
@@ -37,5 +38,10 @@ public class MainClient extends Application {
 
     public static void main(String[] args) {
         launch();
+    }
+
+    @Override
+    public void stop() {
+        AuctionClient.getInstance().close();
     }
 }

@@ -13,10 +13,8 @@
         <Insets top="24.0" right="24.0" bottom="24.0" left="24.0"/>
     </padding>
 
-    <Label text="HE THONG DAU GIA"
+    <Label text="HỆ THỐNG ĐẤU GIÁ"
            style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
-    <Label text="Man hinh khoi dong tam thoi cho client."
-           style="-fx-font-size: 14px;"/>
     <Button mnemonicParsing="false"
             text="Bat dau"
             prefWidth="160.0"

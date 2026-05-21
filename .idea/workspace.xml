@@ -5,10 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="cb69a275-d8da-4bad-af8d-135e8721f859" name="Changes" comment="giao diện cơ bản (login, danh sách)">
-      <change afterPath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/AuctionObserver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/compiler.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/compiler.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/common/src/java/uet/models/items/Art.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main/java/auction/client/controllers/AuctionListController.java" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/java/auction/client/controllers/AuctionListController.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/Auction.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/Auction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/AuctionManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/AuctionManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/AuctionObserver.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/AuctionObserver.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/AuctionStatus.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/AuctionStatus.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/BidTransaction.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/BidTransaction.java" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -65,6 +69,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "Application.AuctionServer.executor": "Run",
     "Application.MainClient.executor": "Run",
     "Application.client.MainClient.executor": "Coverage",
     "DefaultHtmlFileTemplate": "HTML File",
@@ -81,7 +86,7 @@
     "project.structure.last.edited": "Libraries",
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
-    "settings.editor.selected.configurable": "ml.llm.AcpAgentsConfigurable",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
     "to.speed.mode.migration.done": "true"
   }
 }]]></component>
@@ -94,7 +99,20 @@
       <recent name="D:\baitaplaptrinhnangcao\BaiTapLon\common\src\main\java\vn\edu\uet\models\items" />
     </key>
   </component>
-  <component name="RunManager">
+  <component name="RunManager" selected="Application.MainClient">
+    <configuration name="AuctionServer" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="auction.server.network.AuctionServer" />
+      <module name="server" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="auction.server.network.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="MainClient" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="auction.client.MainClient" />
       <module name="client" />
@@ -112,6 +130,7 @@
     <recent_temporary>
       <list>
         <item itemvalue="Application.MainClient" />
+        <item itemvalue="Application.AuctionServer" />
       </list>
     </recent_temporary>
   </component>
@@ -162,7 +181,15 @@
       <option name="project" value="LOCAL" />
       <updated>1777567361202</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="giao diện cơ bản (login, danh sách)">
+      <option name="closed" value="true" />
+      <created>1778463346193</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1778463346193</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

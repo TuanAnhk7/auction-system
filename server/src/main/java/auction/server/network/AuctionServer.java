@@ -4,6 +4,7 @@ import auction.common.exception.AuctionException;
 import auction.common.model.auction.Auction;
 import auction.common.model.auction.AuctionManager;
 import auction.common.model.network.BidResponse;
+import auction.common.model.network.GetAuctionListResponse;
 import auction.common.support.SampleDataFactory;
 
 import java.io.IOException;
@@ -47,6 +48,12 @@ public class AuctionServer {
     public void broadcast(BidResponse response) {
         for (ClientHandler client : clients) {
             client.send(response);
+        }
+    }
+
+    public void broadcastAuctionList(GetAuctionListResponse response) {
+        for (ClientHandler client : clients) {
+            client.sendAuctionList(response);
         }
     }
 

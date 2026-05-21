@@ -4,6 +4,8 @@ import auction.client.ClientSession;
 import auction.client.MainClient;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.collections.FXCollections;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import java.io.IOException;
@@ -16,11 +18,13 @@ public class LoginController {
 
     @FXML
     private PasswordField passwordField;
+    @FXML
+    private ComboBox<String> roleComboBox;
 
     @FXML
     public void initialize() {
-        // Hàm này chạy tự động khi giao diện load lên
-        System.out.println("Giao diện Login đã sẵn sàng!");
+        roleComboBox.setItems(FXCollections.observableArrayList("Bidder", "Seller", "Admin"));
+        roleComboBox.setValue("Bidder");
     }
 
     @FXML
@@ -40,12 +44,19 @@ public class LoginController {
 
         System.out.println("Đang đăng nhập cho user: " + username);
         ClientSession.setUsername(username);
+        ClientSession.setRole(roleComboBox.getValue());
 
         try {
-            MainClient.changeScene("auction-list-view.fxml");
+            if ("Seller".equalsIgnoreCase(ClientSession.getRole())) {
+                MainClient.changeScene("seller-dashboard-view.fxml");
+            } else if ("Admin".equalsIgnoreCase(ClientSession.getRole())) {
+                MainClient.changeScene("admin-dashboard-view.fxml");
+            } else {
+                MainClient.changeScene("auction-list-view.fxml");
+            }
 
         } catch (IOException e) {
-            System.err.println("Lỗi: Không tìm thấy file auction-list-view.fxml tại resources/auction/client/views/");
+            System.err.println("Lỗi: Không mở được màn hình sau đăng nhập.");
             e.printStackTrace();
         }
     }

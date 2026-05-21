@@ -13,6 +13,7 @@
 
   <TextField fx:id="usernameField" promptText="Nhập tên đăng nhập..."/>
   <PasswordField fx:id="passwordField" promptText="Mật khẩu (nếu có)..."/>
+  <ComboBox fx:id="roleComboBox" promptText="Chọn vai trò..."/>
 
   <Button text="Vào phòng đấu giá" onAction="#handleLogin"
           style="-fx-background-color: #2196F3; -fx-text-fill: white;"/>

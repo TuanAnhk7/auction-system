@@ -1,18 +1,16 @@
 package auction.common.model.network;
 
-import auction.common.model.item.Item;
-
 import java.io.Serializable;
 import java.util.List;
 
 public class GetAuctionListResponse implements Serializable {
-    private final List<Item> items;
+    private final List<AuctionView> auctions;
 
-    public GetAuctionListResponse(List<Item> items) {
-        this.items = List.copyOf(items);
+    public GetAuctionListResponse(List<AuctionView> auctions) {
+        this.auctions = List.copyOf(auctions);
     }
 
-    public List<Item> getItems() {
-        return items;
+    public List<AuctionView> getAuctions() {
+        return auctions;
     }
 }

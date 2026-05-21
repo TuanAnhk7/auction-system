@@ -2,21 +2,15 @@ package auction.common.model.network;
 
 import java.io.Serializable;
 
-public class BidResponse implements Serializable {
+public class AdminAuctionActionResponse implements Serializable {
     private final boolean success;
     private final String message;
     private final AuctionView updatedAuction;
-    private final String bidderUsername;
 
-    public BidResponse(boolean success, String message, AuctionView updatedAuction) {
-        this(success, message, updatedAuction, null);
-    }
-
-    public BidResponse(boolean success, String message, AuctionView updatedAuction, String bidderUsername) {
+    public AdminAuctionActionResponse(boolean success, String message, AuctionView updatedAuction) {
         this.success = success;
         this.message = message;
         this.updatedAuction = updatedAuction;
-        this.bidderUsername = bidderUsername;
     }
 
     public boolean isSuccess() {
@@ -29,9 +23,5 @@ public class BidResponse implements Serializable {
 
     public AuctionView getUpdatedAuction() {
         return updatedAuction;
-    }
-
-    public String getBidderUsername() {
-        return bidderUsername;
     }
 }

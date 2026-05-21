@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="680.0" prefWidth="1120.0"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="auction.client.controllers.SellerDashboardController">
+    <top>
+        <VBox spacing="10.0" style="-fx-padding: 12;">
+            <Label text="KÊNH NGƯỜI BÁN" style="-fx-font-size: 20px;"/>
+            <HBox spacing="10.0">
+                <Button text="Làm mới danh sách của tôi" onAction="#handleRefreshMyAuctions"/>
+            </HBox>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="16.0" style="-fx-padding: 12;">
+            <VBox spacing="10.0">
+                <Label text="Đăng ký phiên đấu giá mới" style="-fx-font-size: 16px;"/>
+                <GridPane hgap="12.0" vgap="12.0">
+                    <Label text="Tên sản phẩm" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+                    <TextField fx:id="productNameField" promptText="Nhập tên sản phẩm" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+
+                    <Label text="Giá khởi điểm" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+                    <TextField fx:id="startingPriceField" promptText="Ví dụ: 1500" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+
+                    <Label text="Loại vật phẩm" GridPane.columnIndex="2" GridPane.rowIndex="0"/>
+                    <ComboBox fx:id="itemTypeComboBox" prefWidth="180.0" GridPane.columnIndex="3" GridPane.rowIndex="0"/>
+
+                    <Label text="Thời lượng (phút)" GridPane.columnIndex="2" GridPane.rowIndex="1"/>
+                    <TextField fx:id="durationMinutesField" promptText="Ví dụ: 60" GridPane.columnIndex="3" GridPane.rowIndex="1"/>
+
+                    <Label text="Mô tả" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+                    <TextArea fx:id="descriptionArea" wrapText="true" prefRowCount="4" GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2"/>
+                </GridPane>
+                <HBox spacing="10.0">
+                    <Button text="Đăng ký đấu giá" onAction="#handleCreateAuction"/>
+                </HBox>
+            </VBox>
+
+            <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+                <Label text="Danh sách sản phẩm của tôi" style="-fx-font-size: 16px;"/>
+                <TableView fx:id="myAuctionsTable" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="myProductColumn" prefWidth="250.0" text="Tên sản phẩm"/>
+                        <TableColumn fx:id="myTypeColumn" prefWidth="140.0" text="Loại"/>
+                        <TableColumn fx:id="myPriceColumn" prefWidth="140.0" text="Giá hiện tại"/>
+                        <TableColumn fx:id="myStatusColumn" prefWidth="140.0" text="Trạng thái"/>
+                        <TableColumn fx:id="myEndTimeColumn" prefWidth="240.0" text="Kết thúc lúc"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+    <bottom>
+        <HBox spacing="10.0" alignment="CENTER_RIGHT" style="-fx-padding: 12;">
+            <Button text="Quay lại danh sách vật phẩm" onAction="#handleOpenMarket"/>
+        </HBox>
+    </bottom>
+</BorderPane>

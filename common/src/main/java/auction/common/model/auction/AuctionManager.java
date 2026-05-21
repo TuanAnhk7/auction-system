@@ -1,7 +1,9 @@
 package auction.common.model.auction;
 
 import auction.common.exception.AuctionClosedException;
+import auction.common.exception.AuctionException;
 import auction.common.exception.InvalidBidException;
+import auction.common.model.item.Antique;
 import auction.common.model.item.Art;
 import auction.common.model.item.Item;
 import auction.common.model.user.Bidder;
@@ -35,16 +37,22 @@ public class AuctionManager {
         return instance;
     }
 
-    public Auction createAuction(String type, String name, double startingPrice, LocalDateTime endTime, Object... extraArgs) {
+    public Auction createAuction(
+            String sellerUsername,
+            String type,
+            String name,
+            String description,
+            double startingPrice,
+            LocalDateTime endTime
+    ) {
         Item item = null;
-        if ("art".equalsIgnoreCase(type) && extraArgs.length >= 2) {
-            String artist = (String) extraArgs[0];
-            int year = (int) extraArgs[1];
-            String description = "";
-            item = new Art(name, description,  startingPrice, artist, year);
+        if ("art".equalsIgnoreCase(type)) {
+            item = new Art(name, description, startingPrice, sellerUsername, LocalDateTime.now().getYear());
+        } else if ("antique".equalsIgnoreCase(type) || "antiques".equalsIgnoreCase(type)) {
+            item = new Antique(name, description, startingPrice, "Unknown", 0);
         }
         if (item != null) {
-            Auction auction = new Auction(item, endTime);
+            Auction auction = new Auction(item, endTime, sellerUsername);
             addAuction(auction);
             return auction;
         }
@@ -93,5 +101,20 @@ public class AuctionManager {
 
     public void removeAuction(String auctionId) {
         activeAuctions.remove(auctionId);
+    }
+
+    public Auction updateAuctionStatus(String auctionId, String action) throws AuctionException {
+        Auction auction = activeAuctions.get(auctionId);
+        if (auction == null) {
+            throw new AuctionException("Auction not found.");
+        }
+
+        switch (action.toUpperCase()) {
+            case "START" -> auction.startAuction();
+            case "END" -> auction.finishAuction();
+            case "CANCEL" -> auction.cancel();
+            default -> throw new AuctionException("Unsupported admin action: " + action);
+        }
+        return auction;
     }
 }

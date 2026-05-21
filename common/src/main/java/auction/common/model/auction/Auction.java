@@ -14,6 +14,7 @@ import java.util.List;
 
 public class Auction extends BaseEntity {
     private final Item item;
+    private final String sellerUsername;
     private final LocalDateTime endTime;
     private final List<BidTransaction> bidHistory;
     private double currentHighestBid;
@@ -23,7 +24,12 @@ public class Auction extends BaseEntity {
     private final List<AuctionObserver> observers = new ArrayList<>();//quản lí ng nghe
 
     public Auction(Item item, LocalDateTime endTime) {
+        this(item, endTime, null);
+    }
+
+    public Auction(Item item, LocalDateTime endTime, String sellerUsername) {
         this.item = item;
+        this.sellerUsername = sellerUsername;
         this.endTime = endTime;
         this.bidHistory = new ArrayList<>();
         this.currentHighestBid = item.getStartingPrice();
@@ -92,8 +98,11 @@ public class Auction extends BaseEntity {
     }
 
     public synchronized void cancel() throws AuctionException {
-        if (status == AuctionStatus.PAID){
-            throw new AuctionException("Cannot cancel auction that has already been paid.");
+        if (status == AuctionStatus.CANCELED) {
+            throw new AuctionException("Auction has already been canceled.");
+        }
+        if (status == AuctionStatus.PAID) {
+            throw new AuctionException("Auction cannot be canceled after payment.");
         }
         this.status = AuctionStatus.CANCELED;
         touch();
@@ -119,6 +128,10 @@ public class Auction extends BaseEntity {
 
     public Item getItem() {
         return item;
+    }
+
+    public String getSellerUsername() {
+        return sellerUsername;
     }
 
     public LocalDateTime getEndTime() {

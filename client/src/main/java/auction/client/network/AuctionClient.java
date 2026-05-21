@@ -1,7 +1,11 @@
 package auction.client.network;
 
+import auction.common.model.network.AdminAuctionActionRequest;
+import auction.common.model.network.AdminAuctionActionResponse;
 import auction.common.model.network.BidRequest;
 import auction.common.model.network.BidResponse;
+import auction.common.model.network.CreateAuctionRequest;
+import auction.common.model.network.CreateAuctionResponse;
 import auction.common.model.network.GetAuctionListRequest;
 import auction.common.model.network.GetAuctionListResponse;
 
@@ -69,6 +73,26 @@ public final class AuctionClient {
         out.reset();
     }
 
+    public synchronized void sendCreateAuctionRequest(CreateAuctionRequest request) throws IOException {
+        if (out == null) {
+            throw new IOException("Chua ket noi den server.");
+        }
+
+        out.writeObject(request);
+        out.flush();
+        out.reset();
+    }
+
+    public synchronized void sendAdminAuctionActionRequest(AdminAuctionActionRequest request) throws IOException {
+        if (out == null) {
+            throw new IOException("Chua ket noi den server.");
+        }
+
+        out.writeObject(request);
+        out.flush();
+        out.reset();
+    }
+
     public synchronized void close() {
         try {
             if (socket != null) {
@@ -85,6 +109,10 @@ public final class AuctionClient {
                     Object incoming = in.readObject();
                     if (incoming instanceof BidResponse response) {
                         notifyBidObservers(response);
+                    } else if (incoming instanceof AdminAuctionActionResponse response) {
+                        notifyAdminAuctionActionObservers(response);
+                    } else if (incoming instanceof CreateAuctionResponse response) {
+                        notifyCreateAuctionObservers(response);
                     } else if (incoming instanceof GetAuctionListResponse response) {
                         notifyAuctionListObservers(response);
                     }
@@ -106,6 +134,18 @@ public final class AuctionClient {
     private void notifyAuctionListObservers(GetAuctionListResponse response) {
         for (Observer observer : observers) {
             observer.onAuctionListResponse(response);
+        }
+    }
+
+    private void notifyCreateAuctionObservers(CreateAuctionResponse response) {
+        for (Observer observer : observers) {
+            observer.onCreateAuctionResponse(response);
+        }
+    }
+
+    private void notifyAdminAuctionActionObservers(AdminAuctionActionResponse response) {
+        for (Observer observer : observers) {
+            observer.onAdminAuctionActionResponse(response);
         }
     }
 }

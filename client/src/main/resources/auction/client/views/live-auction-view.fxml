@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Priority?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane prefHeight="620.0" prefWidth="960.0"
+            xmlns="http://javafx.com/javafx/17"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="auction.client.controllers.LiveAuctionController">
+    <padding>
+        <Insets top="16.0" right="16.0" bottom="16.0" left="16.0"/>
+    </padding>
+    <top>
+        <VBox spacing="12.0">
+            <Label fx:id="lblItemName" style="-fx-font-size: 28px; -fx-font-weight: bold;"/>
+            <HBox spacing="30.0">
+                <VBox spacing="6.0">
+                    <Label text="Giá hiện tại" style="-fx-font-size: 14px;"/>
+                    <Label fx:id="lblCurrentPrice" style="-fx-font-size: 30px; -fx-font-weight: bold;"/>
+                </VBox>
+                <VBox spacing="6.0">
+                    <Label text="Người dẫn đầu" style="-fx-font-size: 14px;"/>
+                    <Label fx:id="lblCurrentWinner" style="-fx-font-size: 22px; -fx-font-weight: bold;"/>
+                </VBox>
+            </HBox>
+        </VBox>
+    </top>
+    <center>
+        <VBox spacing="16.0">
+            <VBox spacing="8.0" style="-fx-alignment: center;">
+                <Label text="Thời gian còn lại" style="-fx-font-size: 16px;"/>
+                <Label fx:id="lblCountdown" style="-fx-font-size: 42px; -fx-font-weight: bold; -fx-text-fill: #d97706;"/>
+                <Label fx:id="lblStatusMessage" style="-fx-font-size: 14px;"/>
+            </VBox>
+
+            <VBox spacing="10.0">
+                <Label text="Đặt giá trực tiếp" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                <HBox spacing="10.0">
+                    <TextField fx:id="txtBidAmount" promptText="Nhập số tiền đặt giá" HBox.hgrow="ALWAYS"/>
+                    <Button fx:id="btnPlaceBid" text="Đặt giá" onAction="#handlePlaceBid" prefWidth="120.0"/>
+                </HBox>
+                <HBox spacing="10.0">
+                    <Button fx:id="btnQuick50" text="+50$" onAction="#handleQuickBid50" prefWidth="100.0"/>
+                    <Button fx:id="btnQuick100" text="+100$" onAction="#handleQuickBid100" prefWidth="100.0"/>
+                    <Button fx:id="btnQuick500" text="+500$" onAction="#handleQuickBid500" prefWidth="100.0"/>
+                    <Button text="Quay lại danh sách" onAction="#handleClose" prefWidth="140.0"/>
+                </HBox>
+            </VBox>
+
+            <VBox spacing="10.0" VBox.vgrow="ALWAYS">
+                <Label text="Live Bid Stream" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+                <ListView fx:id="liveBidStream" VBox.vgrow="ALWAYS"/>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

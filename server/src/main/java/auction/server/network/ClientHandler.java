@@ -8,6 +8,8 @@ import auction.common.model.auction.AuctionManager;
 import auction.common.model.auction.BidTransaction;
 import auction.common.model.item.Art;
 import auction.common.model.item.Item;
+import auction.common.model.network.Role;
+import auction.common.model.network.UserAccount;
 import auction.common.model.network.AuctionView;
 import auction.common.model.network.AdminAuctionActionRequest;
 import auction.common.model.network.AdminAuctionActionResponse;
@@ -17,7 +19,12 @@ import auction.common.model.network.CreateAuctionRequest;
 import auction.common.model.network.CreateAuctionResponse;
 import auction.common.model.network.GetAuctionListRequest;
 import auction.common.model.network.GetAuctionListResponse;
+import auction.common.model.network.LoginRequest;
+import auction.common.model.network.LoginResponse;
+import auction.common.model.network.RegisterRequest;
+import auction.common.model.network.RegisterResponse;
 import auction.common.model.user.Bidder;
+import auction.server.auth.UserManager;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -29,8 +36,10 @@ public class ClientHandler implements Runnable {
     private final Socket socket;
     private final AuctionServer server;
     private final AuctionManager auctionManager;
+    private final UserManager userManager = UserManager.getInstance();
     private ObjectOutputStream out;
     private ObjectInputStream in;
+    private UserAccount authenticatedUser;
 
     public ClientHandler(Socket socket, AuctionServer server, AuctionManager auctionManager) {
         this.socket = socket;
@@ -46,7 +55,11 @@ public class ClientHandler implements Runnable {
 
             while (true) {
                 Object receivedData = in.readObject();
-                if (receivedData instanceof BidRequest request) {
+                if (receivedData instanceof LoginRequest request) {
+                    handleLoginRequest(request);
+                } else if (receivedData instanceof RegisterRequest request) {
+                    handleRegisterRequest(request);
+                } else if (receivedData instanceof BidRequest request) {
                     handleBidRequest(request);
                 } else if (receivedData instanceof AdminAuctionActionRequest request) {
                     handleAdminAuctionActionRequest(request);
@@ -106,9 +119,67 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    public synchronized void send(LoginResponse response) {
+        try {
+            if (out != null) {
+                out.writeObject(response);
+                out.flush();
+                out.reset();
+            }
+        } catch (IOException e) {
+            System.err.println("Khong gui duoc ket qua dang nhap den client.");
+        }
+    }
+
+    public synchronized void send(RegisterResponse response) {
+        try {
+            if (out != null) {
+                out.writeObject(response);
+                out.flush();
+                out.reset();
+            }
+        } catch (IOException e) {
+            System.err.println("Khong gui duoc ket qua dang ky den client.");
+        }
+    }
+
+    private void handleLoginRequest(LoginRequest request) {
+        UserAccount user = userManager.authenticate(request.getUsername(), request.getPassword());
+        if (user == null) {
+            send(new LoginResponse(false, "Sai tài khoản hoặc mật khẩu.", null));
+            return;
+        }
+
+        authenticatedUser = user;
+        send(new LoginResponse(true, "Đăng nhập thành công.", user.getRole()));
+    }
+
+    private void handleRegisterRequest(RegisterRequest request) {
+        if (request.getUsername() == null || request.getUsername().isBlank()
+                || request.getPassword() == null || request.getPassword().isBlank()
+                || request.getRole() == null) {
+            send(new RegisterResponse(false, "Thông tin đăng ký không hợp lệ."));
+            return;
+        }
+
+        boolean created = userManager.register(
+                request.getUsername().trim(),
+                request.getPassword(),
+                request.getRole()
+        );
+
+        if (!created) {
+            send(new RegisterResponse(false, "Tên đăng nhập đã tồn tại."));
+            return;
+        }
+
+        send(new RegisterResponse(true, "Đăng ký thành công. Bạn có thể đăng nhập ngay."));
+    }
+
     private void handleBidRequest(BidRequest request) {
         try {
-            Bidder bidder = new Bidder(request.getUsername(), "", request.getUsername(), 100_000.0);
+            UserAccount user = requireRole(Role.BIDDER);
+            Bidder bidder = new Bidder(user.getUsername(), "", user.getUsername(), 100_000.0);
             auctionManager.placeBidByItemId(request.getItemId(), bidder, request.getBidAmount());
 
             Auction updatedAuction = auctionManager.findByItemId(request.getItemId())
@@ -119,25 +190,27 @@ public class ClientHandler implements Runnable {
                     true,
                     "Dat gia thanh cong.",
                     toAuctionView(updatedAuction),
-                    request.getUsername()
+                    user.getUsername()
             ));
-        } catch (AuctionClosedException | InvalidBidException e) {
+        } catch (AuctionException e) {
             send(new BidResponse(false, e.getMessage(), null));
         }
     }
 
     private void handleAuctionListRequest() {
         try {
+            ensureAuthenticated();
             sendAuctionList(buildAuctionListResponse());
-        } catch (Exception e) {
+        } catch (AuctionException e) {
             System.err.println("Khong gui duoc danh sach dau gia hien tai.");
         }
     }
 
     private void handleCreateAuctionRequest(CreateAuctionRequest request) {
         try {
+            UserAccount user = requireRole(Role.SELLER);
             Auction auction = auctionManager.createAuction(
-                    request.getSellerUsername(),
+                    user.getUsername(),
                     request.getItemType(),
                     request.getItemName(),
                     request.getDescription(),
@@ -158,6 +231,7 @@ public class ClientHandler implements Runnable {
 
     private void handleAdminAuctionActionRequest(AdminAuctionActionRequest request) {
         try {
+            requireRole(Role.ADMIN);
             Auction auction = auctionManager.updateAuctionStatus(request.getAuctionId(), request.getAction());
             AuctionView updatedAuction = toAuctionView(auction);
             send(new AdminAuctionActionResponse(true, "Cập nhật trạng thái thành công.", updatedAuction));
@@ -165,6 +239,21 @@ public class ClientHandler implements Runnable {
         } catch (AuctionException e) {
             send(new AdminAuctionActionResponse(false, e.getMessage(), null));
         }
+    }
+
+    // Mỗi socket giữ user đã đăng nhập để server tự kiểm tra quyền cho các request sau đó.
+    private void ensureAuthenticated() throws AuctionException {
+        if (authenticatedUser == null) {
+            throw new AuctionException("Bạn chưa đăng nhập.");
+        }
+    }
+
+    private UserAccount requireRole(Role expectedRole) throws AuctionException {
+        ensureAuthenticated();
+        if (authenticatedUser.getRole() != expectedRole) {
+            throw new AuctionException("Tài khoản của bạn không có quyền thực hiện thao tác này.");
+        }
+        return authenticatedUser;
     }
 
     private GetAuctionListResponse buildAuctionListResponse() {

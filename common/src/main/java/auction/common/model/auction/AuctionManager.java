@@ -103,6 +103,17 @@ public class AuctionManager {
         activeAuctions.remove(auctionId);
     }
 
+    // Server dùng hàm này trong background task để tự chốt các phiên đã hết giờ.
+    public List<Auction> closeExpiredAuctions() {
+        List<Auction> finishedAuctions = new ArrayList<>();
+        for (Auction auction : activeAuctions.values()) {
+            if (auction.updateStatusIfExpired()) {
+                finishedAuctions.add(auction);
+            }
+        }
+        return finishedAuctions;
+    }
+
     public Auction updateAuctionStatus(String auctionId, String action) throws AuctionException {
         Auction auction = activeAuctions.get(auctionId);
         if (auction == null) {

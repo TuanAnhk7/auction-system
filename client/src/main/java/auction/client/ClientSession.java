@@ -1,8 +1,10 @@
 package auction.client;
 
+import auction.common.model.network.Role;
+
 public final class ClientSession {
     private static volatile String username = "guest";
-    private static volatile String role = "Bidder";
+    private static volatile Role role = Role.BIDDER;
 
     private ClientSession() {
     }
@@ -15,11 +17,11 @@ public final class ClientSession {
         ClientSession.username = username;
     }
 
-    public static String getRole() {
+    public static Role getRole() {
         return role;
     }
 
-    public static void setRole(String role) {
+    public static void setRole(Role role) {
         ClientSession.role = role;
     }
 }

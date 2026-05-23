@@ -8,6 +8,10 @@ import auction.common.model.network.CreateAuctionRequest;
 import auction.common.model.network.CreateAuctionResponse;
 import auction.common.model.network.GetAuctionListRequest;
 import auction.common.model.network.GetAuctionListResponse;
+import auction.common.model.network.LoginRequest;
+import auction.common.model.network.LoginResponse;
+import auction.common.model.network.RegisterRequest;
+import auction.common.model.network.RegisterResponse;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -63,31 +67,36 @@ public final class AuctionClient {
         out.reset();
     }
 
-    public synchronized void requestAuctionList() throws IOException {
-        if (out == null) {
-            throw new IOException("Chua ket noi den server.");
-        }
+    public synchronized void sendLoginRequest(LoginRequest request) throws IOException {
+        ensureConnected();
+        out.writeObject(request);
+        out.flush();
+        out.reset();
+    }
 
+    public synchronized void sendRegisterRequest(RegisterRequest request) throws IOException {
+        ensureConnected();
+        out.writeObject(request);
+        out.flush();
+        out.reset();
+    }
+
+    public synchronized void requestAuctionList() throws IOException {
+        ensureConnected();
         out.writeObject(new GetAuctionListRequest());
         out.flush();
         out.reset();
     }
 
     public synchronized void sendCreateAuctionRequest(CreateAuctionRequest request) throws IOException {
-        if (out == null) {
-            throw new IOException("Chua ket noi den server.");
-        }
-
+        ensureConnected();
         out.writeObject(request);
         out.flush();
         out.reset();
     }
 
     public synchronized void sendAdminAuctionActionRequest(AdminAuctionActionRequest request) throws IOException {
-        if (out == null) {
-            throw new IOException("Chua ket noi den server.");
-        }
-
+        ensureConnected();
         out.writeObject(request);
         out.flush();
         out.reset();
@@ -109,6 +118,10 @@ public final class AuctionClient {
                     Object incoming = in.readObject();
                     if (incoming instanceof BidResponse response) {
                         notifyBidObservers(response);
+                    } else if (incoming instanceof LoginResponse response) {
+                        notifyLoginObservers(response);
+                    } else if (incoming instanceof RegisterResponse response) {
+                        notifyRegisterObservers(response);
                     } else if (incoming instanceof AdminAuctionActionResponse response) {
                         notifyAdminAuctionActionObservers(response);
                     } else if (incoming instanceof CreateAuctionResponse response) {
@@ -146,6 +159,24 @@ public final class AuctionClient {
     private void notifyAdminAuctionActionObservers(AdminAuctionActionResponse response) {
         for (Observer observer : observers) {
             observer.onAdminAuctionActionResponse(response);
+        }
+    }
+
+    private void notifyLoginObservers(LoginResponse response) {
+        for (Observer observer : observers) {
+            observer.onLoginResponse(response);
+        }
+    }
+
+    private void notifyRegisterObservers(RegisterResponse response) {
+        for (Observer observer : observers) {
+            observer.onRegisterResponse(response);
+        }
+    }
+
+    private void ensureConnected() throws IOException {
+        if (out == null) {
+            throw new IOException("Chua ket noi den server.");
         }
     }
 }

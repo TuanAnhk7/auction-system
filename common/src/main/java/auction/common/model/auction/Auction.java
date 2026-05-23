@@ -108,11 +108,14 @@ public class Auction extends BaseEntity {
         touch();
     }
 
-    public synchronized void updateStatusIfExpired() {
+    // Trả về true nếu phiên vừa được tự động đóng do hết giờ.
+    public synchronized boolean updateStatusIfExpired() {
         if (status == AuctionStatus.RUNNING && LocalDateTime.now().isAfter(endTime)) {
             this.status = AuctionStatus.FINISHED;
             touch();
+            return true;
         }
+        return false;
     }
 
     private void ensureStatus(AuctionStatus expectedStatus, String message) throws AuctionException {

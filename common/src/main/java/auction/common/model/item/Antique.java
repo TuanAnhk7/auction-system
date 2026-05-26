@@ -1,15 +1,21 @@
 package auction.common.model.item;
-
+import java.time.Instant;
 public class Antique extends Item {
-    private final String origin;
-    private final int estimatedAge;
+    private String origin;
+    private int estimatedAge;
 
-    public Antique(String name, String description, double startingPrice, String origin, int estimatedAge) {
-        this(java.util.UUID.randomUUID().toString(), name, description, startingPrice, origin, estimatedAge);
-    }
+    public Antique(String name,
+                   String description,
+                   double startingPrice,
+                   Instant startTime,
+                   Instant endTime,
+                   String sellerId,
+                   String origin,
+                   int estimatedAge) {
 
-    public Antique(String itemId, String name, String description, double startingPrice, String origin, int estimatedAge) {
-        super(itemId, name, description, startingPrice);
+        super(name, description, startingPrice,
+                startTime, endTime, sellerId);
+
         this.origin = origin;
         this.estimatedAge = estimatedAge;
     }
@@ -19,11 +25,26 @@ public class Antique extends Item {
         return "Antique";
     }
 
+    @Override
+    public String getDisplayCreator() {
+        return origin != null && !origin.isBlank() ? origin : "Không rõ";
+    }
+
     public String getOrigin() {
         return origin;
     }
 
+    public void setOrigin(String origin) {
+        this.origin = origin;
+        touch();
+    }
+
     public int getEstimatedAge() {
         return estimatedAge;
+    }
+
+    public void setEstimatedAge(int estimatedAge) {
+        this.estimatedAge = estimatedAge;
+        touch();
     }
 }

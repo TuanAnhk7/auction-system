@@ -4,17 +4,19 @@ import auction.common.model.item.Item;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Seller extends User {
     private double rating;
-    private final List<Item> products;
+    private final Map<String, Item> products;
 
-    public Seller(String username, String password, String fullName, double rating) {
-        super(username, password, fullName);
+    public Seller(String username, String hashedPassword, String fullName, double rating) {
+        super(username, hashedPassword, fullName, Role.SELLER);
         this.rating = rating;
-        this.products = new ArrayList<>();
+        this.products = new HashMap<>();
     }
 
     public double getRating() {
@@ -26,19 +28,36 @@ public class Seller extends User {
         touch();
     }
 
-    public List<Item> getProducts() {
-        return Collections.unmodifiableList(products);
+    public Collection<Item> getProducts() {
+        return Collections.unmodifiableCollection(products.values());
     }
 
-    public void addProduct(Item item) {
-        products.add(item);
+    public boolean addProduct(Item item) {
+        if (item == null || item.getId() == null || item.getId().trim().isEmpty()) {
+            return false;
+        }
+        if (products.containsKey(item.getId())) {
+            return false;
+        }
+        products.put(item.getId(), item);
         touch();
+        return true;
     }
 
     public boolean updateProduct(String itemId, String newName, String newDescription,
                                  double newStartingPrice, Instant newStartTime, Instant newEndTime) {
-        for (Item item : products) {
-            if (item.getId().equals(itemId)) {
+        Item item = products.get(itemId);
+        if (newName == null || newName.trim().isEmpty()) {
+            return false;
+        }
+        if (newStartingPrice <= 0) {
+            return false;
+        }
+        if (newStartTime == null || newEndTime == null || newStartTime.isAfter(newEndTime)) {
+            return false;
+        }
+
+        if (item != null) {
                 item.setName(newName);
                 item.setDescription(newDescription);
                 item.setStartingPrice(newStartingPrice);
@@ -46,14 +65,14 @@ public class Seller extends User {
                 item.setEndTime(newEndTime);
                 touch();
                 return true;
-            }
         }
         return false;
     }
 
     public boolean removeProduct(String itemId) {
-        boolean removed = products.removeIf(item -> item.getId().equals(itemId));
-        if (removed) touch();
+        Item removedItem = products.remove(itemId);
+        boolean removed = (removedItem != null);
+        if (removed) { touch(); }
         return removed;
     }
 }

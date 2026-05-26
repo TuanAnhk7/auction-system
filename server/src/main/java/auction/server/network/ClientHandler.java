@@ -8,23 +8,10 @@ import auction.common.model.auction.AuctionManager;
 import auction.common.model.auction.BidTransaction;
 import auction.common.model.item.Art;
 import auction.common.model.item.Item;
-import auction.common.model.network.Role;
-import auction.common.model.network.UserAccount;
-import auction.common.model.network.AuctionView;
-import auction.common.model.network.AdminAuctionActionRequest;
-import auction.common.model.network.AdminAuctionActionResponse;
-import auction.common.model.network.BidRequest;
-import auction.common.model.network.BidResponse;
-import auction.common.model.network.CreateAuctionRequest;
-import auction.common.model.network.CreateAuctionResponse;
-import auction.common.model.network.GetAuctionListRequest;
-import auction.common.model.network.GetAuctionListResponse;
-import auction.common.model.network.LoginRequest;
-import auction.common.model.network.LoginResponse;
-import auction.common.model.network.RegisterRequest;
-import auction.common.model.network.RegisterResponse;
+import auction.common.model.network.*;
 import auction.common.model.user.Bidder;
 import auction.server.auth.UserManager;
+import auction.common.model.auction.AuctionStatus;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -65,6 +52,10 @@ public class ClientHandler implements Runnable {
                     handleAdminAuctionActionRequest(request);
                 } else if (receivedData instanceof CreateAuctionRequest request) {
                     handleCreateAuctionRequest(request);
+                } else if (receivedData instanceof UpdateItemRequest request) {
+                    handleUpdateItemRequest(request);
+                } else if (receivedData instanceof DeleteItemRequest request) {
+                    handleDeleteItemRequest(request);
                 } else if (receivedData instanceof GetAuctionListRequest) {
                     handleAuctionListRequest();
                 }
@@ -143,6 +134,42 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    public synchronized void send(UpdateItemResponse response) {
+        try {
+            if (out != null) {
+                out.writeObject(response);
+                out.flush();
+                out.reset();
+            }
+        } catch (IOException e) {
+            System.err.println("Khong gui duoc ket qua cap nhat san pham den client.");
+        }
+    }
+
+    public synchronized void send(DeleteItemResponse response) {
+        try {
+            if (out != null) {
+                out.writeObject(response);
+                out.flush();
+                out.reset();
+            }
+        } catch (IOException e) {
+            System.err.println("Khong gui duoc ket qua xoa san pham den client.");
+        }
+    }
+
+    public synchronized void send(AuctionEndedResponse response) {
+        try {
+            if (out != null) {
+                out.writeObject(response);
+                out.flush();
+                out.reset();
+            }
+        } catch (IOException e) {
+            System.err.println("Khong gui duoc thong bao ket thuc dau gia.");
+        }
+    }
+
     private void handleLoginRequest(LoginRequest request) {
         UserAccount user = userManager.authenticate(request.getUsername(), request.getPassword());
         if (user == null) {
@@ -179,8 +206,7 @@ public class ClientHandler implements Runnable {
     private void handleBidRequest(BidRequest request) {
         try {
             UserAccount user = requireRole(Role.BIDDER);
-            Bidder bidder = new Bidder(user.getUsername(), "", user.getUsername(), 100_000.0);
-            auctionManager.placeBidByItemId(request.getItemId(), bidder, request.getBidAmount());
+            auctionManager.placeBidByItemId(request.getItemId(), user.getUsername(), request.getBidAmount());
 
             Auction updatedAuction = auctionManager.findByItemId(request.getItemId())
                     .orElseThrow(() -> new InvalidBidException("Khong tim thay phien dau gia sau khi cap nhat."))
@@ -209,13 +235,19 @@ public class ClientHandler implements Runnable {
     private void handleCreateAuctionRequest(CreateAuctionRequest request) {
         try {
             UserAccount user = requireRole(Role.SELLER);
+            LocalDateTime startTime = request.getStartTime();
+            LocalDateTime endTime = startTime.plusMinutes(request.getDurationMinutes()); //Tính tgian kết thúc
+
             Auction auction = auctionManager.createAuction(
                     user.getUsername(),
                     request.getItemType(),
                     request.getItemName(),
                     request.getDescription(),
                     request.getStartingPrice(),
-                    LocalDateTime.now().plusMinutes(request.getDurationMinutes())
+                    startTime,
+                    endTime,
+                    request.getSpecificProp1(),
+                    request.getSpecificProp2()
             );
             if (auction == null) {
                 send(new CreateAuctionResponse(false, "Loại vật phẩm chưa được hỗ trợ.", null));
@@ -226,6 +258,56 @@ public class ClientHandler implements Runnable {
             server.broadcastAuctionList(buildAuctionListResponse());
         } catch (Exception e) {
             send(new CreateAuctionResponse(false, "Không tạo được phiên đấu giá: " + e.getMessage(), null));
+        }
+    }
+
+    private void handleUpdateItemRequest(UpdateItemRequest request) {
+        try {
+            UserAccount user = requireRole(Role.SELLER); // Chỉ người bán mới có thể sửa sản phẩm của họ
+            Auction updatedAuction = auctionManager.updateItem(
+                    request.getAuctionId(),
+                    request.getName(),
+                    request.getDescription(),
+                    request.getStartingPrice(),
+                    request.getItemType(),
+                    request.getSpecificProp1(),
+                    request.getSpecificProp2()
+            );
+            AuctionView updatedAuctionView = toAuctionView(updatedAuction);
+            send(new UpdateItemResponse(true, "Cập nhật sản phẩm thành công.", updatedAuctionView));
+            server.broadcastAuctionList(buildAuctionListResponse()); // Phát sóng danh sách đấu giá đã cập nhật
+        } catch (AuctionException e) {
+            send(new UpdateItemResponse(false, "Không thể cập nhật sản phẩm: " + e.getMessage(), null));
+        } catch (Exception e) {
+            send(new UpdateItemResponse(false, "Lỗi không xác định khi cập nhật sản phẩm: " + e.getMessage(), null));
+            e.printStackTrace();
+        }
+    }
+
+    private void handleDeleteItemRequest(DeleteItemRequest request) {
+        try {
+            UserAccount user = requireRole(Role.SELLER);
+            // Kiểm tra xem người dùng có quyền xóa phiên đấu giá này không
+            Auction auctionToDelete = auctionManager.findById(request.getAuctionId())
+                    .orElseThrow(() -> new AuctionException("Không tìm thấy phiên đấu giá để xóa."));
+
+            if (!auctionToDelete.getSellerUsername().equals(user.getUsername())) {
+                throw new AuctionException("Bạn không có quyền xóa phiên đấu giá này.");
+            }
+            
+            // Chỉ cho phép xóa khi phiên đấu giá ở trạng thái OPEN hoặc CANCELED
+            if (auctionToDelete.getStatus() != AuctionStatus.OPEN && auctionToDelete.getStatus() != AuctionStatus.CANCELED && auctionToDelete.getStatus() != AuctionStatus.PENDING) {
+                throw new AuctionException("Không thể xóa phiên đấu giá đang RUNNING hoặc đã FINISHED/PAID.");
+            }
+
+            auctionManager.removeAuction(request.getAuctionId());
+            send(new DeleteItemResponse(true, "Xóa sản phẩm thành công. Phiên đấu giá đã được lưu trữ."));
+            server.broadcastAuctionList(buildAuctionListResponse());
+        } catch (AuctionException e) {
+            send(new DeleteItemResponse(false, "Không thể xóa sản phẩm: " + e.getMessage()));
+        } catch (Exception e) {
+            send(new DeleteItemResponse(false, "Lỗi không xác định khi xóa sản phẩm: " + e.getMessage()));
+            e.printStackTrace();
         }
     }
 
@@ -266,9 +348,9 @@ public class ClientHandler implements Runnable {
 
     private AuctionView toAuctionView(Auction auction) {
         Item item = auction.getItem();
-        String creatorName = auction.getSellerUsername();
-        if ((creatorName == null || creatorName.isBlank()) && item instanceof Art art) {
-            creatorName = art.getArtist();
+        String creatorName = item.getDisplayCreator();
+        if (creatorName == null || creatorName.isBlank()) {
+            creatorName = auction.getSellerUsername(); // Fallback về tên người bán nếu item không có creator
         }
         if (creatorName == null || creatorName.isBlank()) {
             creatorName = "Không rõ";
@@ -296,9 +378,9 @@ public class ClientHandler implements Runnable {
     private String formatBidHistory(BidTransaction transaction) {
         return String.format(
                 "[%s] %s đặt %.2f USD",
-                transaction.getTimestamp(),
-                transaction.getBidder().getUsername(),
-                transaction.getBidAmount()
+                transaction.getCreatedAt(),
+                transaction.getBidderUsername(),
+                transaction.getAmount()
         );
     }
 

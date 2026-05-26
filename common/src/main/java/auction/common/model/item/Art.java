@@ -1,15 +1,21 @@
 package auction.common.model.item;
-
+import java.time.Instant;
 public class Art extends Item {
-    private final String artist;
-    private final int yearCreated;
+    private String artist;
+    private int yearCreated;
 
-    public Art(String name, String description, double startingPrice, String artist, int yearCreated) {
-        this(java.util.UUID.randomUUID().toString(), name, description, startingPrice, artist, yearCreated);
-    }
+    public Art(String name,
+               String description,
+               double startingPrice,
+               Instant startTime,
+               Instant endTime,
+               String sellerId,
+               String artist,
+               int yearCreated) {
 
-    public Art(String itemId, String name, String description, double startingPrice, String artist, int yearCreated) {
-        super(itemId, name, description, startingPrice);
+        super(name, description, startingPrice,
+                startTime, endTime, sellerId);
+
         this.artist = artist;
         this.yearCreated = yearCreated;
     }
@@ -19,11 +25,26 @@ public class Art extends Item {
         return "Art";
     }
 
+    @Override
+    public String getDisplayCreator() {
+        return artist;
+    }
+
     public String getArtist() {
         return artist;
     }
 
+    public void setArtist(String artist) {
+        this.artist = artist;
+        touch();
+    }
+
     public int getYearCreated() {
         return yearCreated;
+    }
+
+    public void setYearCreated(int yearCreated) {
+        this.yearCreated = yearCreated;
+        touch();
     }
 }

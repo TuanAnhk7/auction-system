@@ -1,42 +1,78 @@
 package auction.common.model.user;
 
-import auction.common.model.BaseEntity;
+import java.time.Instant;
+import java.util.Objects;
+import java.util.UUID;
 
-public abstract class User extends BaseEntity {
-    private final String username;
-    private String password;
-    private String fullName;
+public abstract class User {
+    protected final String id;
+    protected String username;
+    protected String hashedPassword;
+    protected String fullName;
+    protected Role role;
+    protected Instant createdAt;
+    protected Instant lastModified;
+    protected boolean isActive;
 
-    protected User(String username, String password, String fullName) {
+    public User(String username, String hashedPassword, String fullName, Role role) {
+        this.id = UUID.randomUUID().toString();
         this.username = username;
-        this.password = password;
+        this.hashedPassword = hashedPassword;
         this.fullName = fullName;
+        this.role = role;
+        this.createdAt = Instant.now();
+        this.lastModified = this.createdAt;
+        this.isActive = true;
     }
 
-    public String getUsername() {
-        return username;
+    public User(String id, String username, String hashedPassword, String fullName, Role role, Instant createdAt, Instant lastModified, boolean isActive) {
+        this.id = id;
+        this.username = username;
+        this.hashedPassword = hashedPassword;
+        this.fullName = fullName;
+        this.role = role;
+        this.createdAt = createdAt;
+        this.lastModified = lastModified;
+        this.isActive = isActive;
     }
 
-    public String getPassword() {
-        return password;
+    protected void touch() {
+        this.lastModified = Instant.now();
     }
-
-    public void setPassword(String password) {
-        this.password = password;
-        touch();
-    }
-
-    public String getFullName() {
-        return fullName;
-    }
+    public String getId() { return id; }
+    public String getUsername() { return username; }
+    public String getHashedPassword() { return hashedPassword; }
+    public String getFullName() { return fullName; }
+    public Role getRole() { return role; }
+    public Instant getCreatedAt() { return createdAt; }
+    public Instant getLastModified() { return lastModified; }
+    public boolean isActive() { return isActive; }
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
         touch();
     }
 
+    public void setHashedPassword(String hashedPassword) {
+        this.hashedPassword = hashedPassword;
+        touch();
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+        touch();
+    }
+
     @Override
-    public String toString() {
-        return fullName + " (" + username + ")";
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(id, user.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

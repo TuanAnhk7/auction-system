@@ -8,6 +8,7 @@ import auction.common.model.item.Item;
 import auction.common.model.user.Bidder;
 
 import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -15,25 +16,39 @@ import java.util.List;
 public class Auction extends BaseEntity {
     private final Item item;
     private final String sellerUsername;
-    private final LocalDateTime endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private final List<BidTransaction> bidHistory;
     private double currentHighestBid;
     private Bidder highestBidder;
     private AuctionStatus status;
 
-    private final List<AuctionObserver> observers = new ArrayList<>();//quản lí ng nghe
+    private final List<AuctionObserver> observers = new ArrayList<>();
+    public Auction(Item item, Instant startTime, Instant endTime, String sellerUsername) {
+        super();
+        if (item == null) throw new IllegalArgumentException("Item cannot be null.");
+        if (startTime == null) throw new IllegalArgumentException("Start time cannot be null.");
+        if (endTime == null) throw new IllegalArgumentException("End time cannot be null.");
+        if (endTime.isBefore(startTime)) throw new IllegalArgumentException("End time cannot be before start time.");
 
-    public Auction(Item item, LocalDateTime endTime) {
-        this(item, endTime, null);
-    }
-
-    public Auction(Item item, LocalDateTime endTime, String sellerUsername) {
         this.item = item;
         this.sellerUsername = sellerUsername;
         this.endTime = endTime;
         this.bidHistory = new ArrayList<>();
         this.currentHighestBid = item.getStartingPrice();
-        this.status = AuctionStatus.OPEN;
+        this.status = (startTime.isAfter(LocalDateTime.now())) ? AuctionStatus.PENDING : AuctionStatus.OPEN;
+    }
+
+    public Auction(String id, Instant createdAt, Instant lastModified, Item item, String sellerUsername, LocalDateTime startTime, LocalDateTime endTime, List<BidTransaction> bidHistory, double currentHighestBid, Bidder highestBidder, AuctionStatus status) {
+        super(id, createdAt, lastModified);
+        this.item = item;
+        this.sellerUsername = sellerUsername;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.bidHistory = new ArrayList<>(bidHistory); // Defensive copy
+        this.currentHighestBid = currentHighestBid;
+        this.highestBidder = highestBidder;
+        this.status = status;
     }
 
     public synchronized void addObserver(AuctionObserver observer) {
@@ -80,13 +95,18 @@ public class Auction extends BaseEntity {
     }
 
     public synchronized void startAuction() throws AuctionException {
-        ensureStatus(AuctionStatus.OPEN, "Auction can only start from OPEN status.");
+        if (status != AuctionStatus.OPEN && status != AuctionStatus.PENDING) {
+            throw new AuctionException("Auction can only start from OPEN or PENDING status.");
+        }
+        this.startTime = LocalDateTime.now();
         this.status = AuctionStatus.RUNNING;
         touch();
     }
 
     public synchronized void finishAuction() throws AuctionException {
-        ensureStatus(AuctionStatus.RUNNING, "Auction can only finish from RUNNING status.");
+        if (status != AuctionStatus.RUNNING && status != AuctionStatus.OPEN) {
+            throw new AuctionException("Auction can only finish from RUNNING or OPEN status.");
+        }
         this.status = AuctionStatus.FINISHED;
         touch();
     }
@@ -110,12 +130,21 @@ public class Auction extends BaseEntity {
 
     // Trả về true nếu phiên vừa được tự động đóng do hết giờ.
     public synchronized boolean updateStatusIfExpired() {
-        if (status == AuctionStatus.RUNNING && LocalDateTime.now().isAfter(endTime)) {
-            this.status = AuctionStatus.FINISHED;
+        boolean statusChanged = false;
+        LocalDateTime now = LocalDateTime.now();
+
+        if (status == AuctionStatus.PENDING && startTime != null && now.isAfter(startTime)) {
+            this.status = AuctionStatus.RUNNING;
+            statusChanged = true;
             touch();
-            return true;
         }
-        return false;
+
+        if (status == AuctionStatus.RUNNING && now.isAfter(endTime)) {
+            this.status = AuctionStatus.FINISHED;
+            statusChanged = true;
+            touch();
+        }
+        return statusChanged;
     }
 
     private void ensureStatus(AuctionStatus expectedStatus, String message) throws AuctionException {
@@ -135,6 +164,10 @@ public class Auction extends BaseEntity {
 
     public String getSellerUsername() {
         return sellerUsername;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
     }
 
     public LocalDateTime getEndTime() {

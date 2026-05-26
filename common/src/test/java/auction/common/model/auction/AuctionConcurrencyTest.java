@@ -7,7 +7,9 @@ import auction.common.model.item.Art;
 import auction.common.model.user.Bidder;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -24,10 +26,12 @@ class AuctionConcurrencyTest {
 
     @Test
     void concurrentBidsKeepHighestPriceConsistent() throws Exception {
-        Auction auction = new Auction(
-                new Art("Test Art", "Concurrent bid test", 100.0, "Artist", 2020),
-                LocalDateTime.now().plusMinutes(10)
-        );
+        Instant startTime = Instant.now();
+        Instant endTime = startTime.plus(10, ChronoUnit.MINUTES);
+
+        Art testArt = new Art("Test Art", "Concurrent bid test", 100.0, startTime, endTime, "testSeller", "Artist", 2020);
+
+        Auction auction = new Auction(testArt, startTime, endTime, "testSeller");
         auction.startAuction();
 
         List<Bidder> bidders = new ArrayList<>();
@@ -69,11 +73,14 @@ class AuctionConcurrencyTest {
 
     @Test
     void auctionManagerRoutesConcurrentBidsToSingleAuctionSafely() throws Exception {
-        AuctionManager manager = AuctionManager.getInstance();
-        Auction auction = new Auction(
-                new Art("Managed Art", "Manager concurrency test", 300.0, "Artist", 2021),
-                LocalDateTime.now().plusMinutes(10)
-        );
+        IUserManager notificationService = null;
+        AuctionManager manager = AuctionManager.getInstance(notificationService);
+        Instant startTime = Instant.now();
+        Instant endTime = startTime.plus(10, ChronoUnit.MINUTES);
+
+        Art managedArt = new Art("Managed Art", "Manager concurrency test", 300.0, startTime, endTime, "testSeller", "Artist", 2021);
+
+        Auction auction = new Auction(managedArt, startTime, endTime, "testSeller");
         auction.startAuction();
         manager.addAuction(auction);
 
@@ -99,7 +106,10 @@ class AuctionConcurrencyTest {
         assertEquals(450.0, auction.getCurrentHighestBid());
         assertEquals("c", auction.getHighestBidder().getUsername());
         manager.removeAuction(auction.getId());
-        assertFalse(manager.findById(auction.getId()).isPresent());
+
+        assertTrue(manager.findById(auction.getId()).isPresent());
+        assertFalse(manager.getActiveAuctions().contains(auction));
+        assertTrue(manager.getArchivedAuctions().contains(auction));
     }
 
     private boolean tryBid(Auction auction, Bidder bidder, double bidAmount, CountDownLatch startGate)
@@ -117,7 +127,7 @@ class AuctionConcurrencyTest {
             throws InterruptedException {
         startGate.await();
         try {
-            manager.placeBid(auctionId, bidder, bidAmount);
+            manager.placeBid(auctionId, bidder.getUsername(), bidAmount);
             return true;
         } catch (AuctionClosedException | InvalidBidException e) {
             return false;

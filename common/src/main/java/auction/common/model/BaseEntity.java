@@ -1,37 +1,45 @@
 package auction.common.model;
 
-import java.io.Serializable;
 import java.time.Instant;
+import java.util.Objects;
 import java.util.UUID;
 
-public abstract class BaseEntity implements Serializable {
-    private final String id;
-    private final Instant createdAt;
-    private Instant updatedAt;
+public abstract class BaseEntity {
+    protected final String id;
+    protected Instant createdAt;
+    protected Instant lastModified;
 
-    protected BaseEntity() {
-        this(UUID.randomUUID().toString());
-    }
-
-    protected BaseEntity(String id) {
-        this.id = id;
+    public BaseEntity() {
+        this.id = UUID.randomUUID().toString();
         this.createdAt = Instant.now();
-        this.updatedAt = createdAt;
+        this.lastModified = this.createdAt;
     }
 
-    public String getId() {
-        return id;
-    }
-
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
-
-    public Instant getUpdatedAt() {
-        return updatedAt;
+    // Constructor cho việc tải từ DataBase
+    public BaseEntity(String id, Instant createdAt, Instant lastModified) {
+        this.id = id;
+        this.createdAt = createdAt;
+        this.lastModified = lastModified;
     }
 
     protected void touch() {
-        this.updatedAt = Instant.now();
+        this.lastModified = Instant.now();
+    }
+
+    public String getId() { return id; }
+    public Instant getCreatedAt() { return createdAt; }
+    public Instant getLastModified() { return lastModified; }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BaseEntity that = (BaseEntity) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

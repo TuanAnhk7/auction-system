@@ -1,15 +1,23 @@
 package auction.common.model.item;
 
+import java.time.Instant;
+
 public class Electronics extends Item {
-    private final String brand;
-    private final int warrantyMonths;
+    private String brand;
+    private int warrantyMonths;
 
-    public Electronics(String name, String description, double startingPrice, String brand, int warrantyMonths) {
-        this(java.util.UUID.randomUUID().toString(), name, description, startingPrice, brand, warrantyMonths);
-    }
+    public Electronics(String name,
+                       String description,
+                       double startingPrice,
+                       Instant startTime,
+                       Instant endTime,
+                       String sellerId,
+                       String brand,
+                       int warrantyMonths) {
 
-    public Electronics(String itemId, String name, String description, double startingPrice, String brand, int warrantyMonths) {
-        super(itemId, name, description, startingPrice);
+        super(name, description, startingPrice,
+                startTime, endTime, sellerId);
+
         this.brand = brand;
         this.warrantyMonths = warrantyMonths;
     }
@@ -19,11 +27,26 @@ public class Electronics extends Item {
         return "Electronics";
     }
 
+    @Override
+    public String getDisplayCreator() {
+        return brand != null && !brand.isBlank() ? brand : getSellerUsername();
+    }
+
     public String getBrand() {
         return brand;
     }
 
+    public void setBrand(String brand) {
+        this.brand = brand;
+        touch();
+    }
+
     public int getWarrantyMonths() {
         return warrantyMonths;
+    }
+
+    public void setWarrantyMonths(int warrantyMonths) {
+        this.warrantyMonths = warrantyMonths;
+        touch();
     }
 }

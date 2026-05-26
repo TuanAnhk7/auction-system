@@ -80,7 +80,7 @@ public class AuctionServer {
                     broadcastAuctionList(buildAuctionListResponse());
                 }
             } catch (Exception e) {
-                System.err.println("Lỗi khi tự động đóng phiên đấu giá: " + e.getMessage());
+                System.err.println("Lỗi khi tự động đóng/bắt đầu phiên đấu giá: " + e.getMessage());
             }
         }, 1, 1, TimeUnit.SECONDS);
     }
@@ -111,9 +111,9 @@ public class AuctionServer {
 
     private AuctionView toAuctionView(Auction auction) {
         Item item = auction.getItem();
-        String creatorName = auction.getSellerUsername();
-        if ((creatorName == null || creatorName.isBlank()) && item instanceof Art art) {
-            creatorName = art.getArtist();
+        String creatorName = item.getDisplayCreator();
+        if (creatorName == null || creatorName.isBlank()) {
+            creatorName = item.getSellerUsername();
         }
         if (creatorName == null || creatorName.isBlank()) {
             creatorName = "Không rõ";
@@ -125,7 +125,7 @@ public class AuctionServer {
                 item.getName(),
                 item.getDescription(),
                 creatorName,
-                auction.getSellerUsername(),
+                item.getSellerUsername(),
                 item.getCategory(),
                 item.getStartingPrice(),
                 item.getCurrentPrice(),
@@ -141,9 +141,9 @@ public class AuctionServer {
     private String formatBidHistory(BidTransaction transaction) {
         return String.format(
                 "[%s] %s đặt %.2f USD",
-                transaction.getTimestamp(),
-                transaction.getBidder().getUsername(),
-                transaction.getBidAmount()
+                transaction.getCreatedAt(),
+                transaction.getBidderUsername(),
+                transaction.getAmount()
         );
     }
 }

@@ -2,44 +2,89 @@ package auction.common.model.item;
 
 import auction.common.model.BaseEntity;
 
-public abstract class Item extends BaseEntity {
-    private final String name;
-    private final String description;
-    private final double startingPrice;
+import java.time.Instant;
+
+public class Item extends BaseEntity {
+    private String name;
+    private String description;
+    private double startingPrice;
     private double currentPrice;
+    private Instant startTime;
+    private Instant endTime;
+    private String sellerId;
 
-    protected Item(String name, String description, double startingPrice) {
-        this(java.util.UUID.randomUUID().toString(), name, description, startingPrice);
-    }
-
-    protected Item(String itemId, String name, String description, double startingPrice) {
-        super(itemId);
+    public Item(String id, String name, String description, double startingPrice, Instant startTime, Instant endTime, String sellerId) {
+        super(id, Instant.now(), Instant.now());
         this.name = name;
         this.description = description;
         this.startingPrice = startingPrice;
         this.currentPrice = startingPrice;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.sellerId = sellerId;
     }
 
-    public abstract String getCategory();
-
-    public String getName() {
-        return name;
+    // Constructor mới để tạo Item mà không cần ID
+    public Item(String name, String description, double startingPrice, Instant startTime, Instant endTime, String sellerId) {
+        super();
+        this.name = name;
+        this.description = description;
+        this.startingPrice = startingPrice;
+        this.currentPrice = startingPrice;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.sellerId = sellerId;
     }
 
-    public String getDescription() {
-        return description;
-    }
+    public String getName() { return name; }
+    public String getDescription() { return description; }
+    public double getStartingPrice() { return startingPrice; }
+    public double getCurrentPrice() { return currentPrice; }
+    public Instant getStartTime() { return startTime; }
+    public Instant getEndTime() { return endTime; }
+    public String getSellerId() { return sellerId; }
 
-    public double getStartingPrice() {
-        return startingPrice;
-    }
-
-    public double getCurrentPrice() {
-        return currentPrice;
-    }
-
-    public void updateCurrentPrice(double currentPrice) {
-        this.currentPrice = currentPrice;
+    public void setName(String name) {
+        this.name = name;
         touch();
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+        touch();
+    }
+
+    public void setStartingPrice(double startingPrice) {
+        this.startingPrice = startingPrice;
+        touch();
+    }
+
+    public void updateCurrentPrice(double newPrice) {
+        if (newPrice > this.currentPrice) {
+            this.currentPrice = newPrice;
+            touch();
+        }
+    }
+
+    public void setStartTime(Instant startTime) {
+        this.startTime = startTime;
+        touch();
+    }
+
+    public void setEndTime(Instant endTime) {
+        this.endTime = endTime;
+        touch();
+    }
+
+    public String getSellerUsername() {
+        return sellerId;
+    }
+
+    public String getCategory() {
+        return "Item";
+    }
+
+    public String getDisplayCreator() {
+        return sellerId;
     }
 }

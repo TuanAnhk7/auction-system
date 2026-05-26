@@ -23,6 +23,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 public class SellerDashboardController implements Observer {
     @FXML
@@ -35,6 +36,10 @@ public class SellerDashboardController implements Observer {
     private ComboBox<String> itemTypeComboBox;
     @FXML
     private TextArea descriptionArea;
+    @FXML
+    private TextField specificProp1Field;
+    @FXML
+    private TextField specificProp2Field;
     @FXML
     private TableView<AuctionView> myAuctionsTable;
     @FXML
@@ -83,8 +88,10 @@ public class SellerDashboardController implements Observer {
             String itemType = itemTypeComboBox.getValue();
             double startingPrice = Double.parseDouble(startingPriceField.getText().trim());
             long durationMinutes = Long.parseLong(durationMinutesField.getText().trim());
+            String prop1 = specificProp1Field.getText().trim();
+            int prop2 = Integer.parseInt(specificProp2Field.getText().trim());
 
-            validateCreateAuctionForm(itemName, description, itemType, startingPrice, durationMinutes);
+            validateCreateAuctionForm(itemName, description, itemType, startingPrice, durationMinutes, prop1);
 
             AuctionClient.getInstance().sendCreateAuctionRequest(new CreateAuctionRequest(
                     ClientSession.getUsername(),
@@ -92,7 +99,10 @@ public class SellerDashboardController implements Observer {
                     startingPrice,
                     description,
                     itemType,
-                    durationMinutes
+                    LocalDateTime.now(),
+                    durationMinutes,
+                    prop1,
+                    prop2
             ));
         } catch (NumberFormatException e) {
             showAlert(Alert.AlertType.ERROR, "Dữ liệu không hợp lệ", "Giá khởi điểm và thời lượng phải là số hợp lệ.");
@@ -148,7 +158,8 @@ public class SellerDashboardController implements Observer {
             String description,
             String itemType,
             double startingPrice,
-            long durationMinutes
+            long durationMinutes,
+            String prop1
     ) {
         if (itemName.isBlank()) {
             throw new IllegalArgumentException("Tên sản phẩm không được để trống.");
@@ -165,12 +176,17 @@ public class SellerDashboardController implements Observer {
         if (durationMinutes <= 0) {
             throw new IllegalArgumentException("Thời lượng đấu giá phải lớn hơn 0 phút.");
         }
+        if (prop1.isBlank()) {
+            throw new IllegalArgumentException("Thông tin đặc trưng (Họa sĩ/Nguồn gốc) không được để trống.");
+        }
     }
 
     private void clearCreateAuctionForm() {
         productNameField.clear();
         startingPriceField.clear();
         descriptionArea.clear();
+        specificProp1Field.clear();
+        specificProp2Field.clear();
         itemTypeComboBox.setValue("Art");
         durationMinutesField.setText("60");
     }

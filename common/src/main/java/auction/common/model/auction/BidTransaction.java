@@ -1,36 +1,36 @@
 package auction.common.model.auction;
 
-import auction.common.model.user.Bidder;
 import auction.common.model.BaseEntity;
+import auction.common.model.user.Bidder;
 
-import java.io.Serializable;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
-public class BidTransaction extends BaseEntity implements Serializable {
-    private final Bidder bidder;
-    private final double bidAmount;
-    private final LocalDateTime timestamp;
+public class BidTransaction extends BaseEntity {
+    private final String bidderId;
+    private final String bidderUsername;
+    private final double amount;
 
-    public BidTransaction(Bidder bidder, double bidAmount) {
+    // Constructor mới để lưu trữ ID và username của Bidder
+    public BidTransaction(Bidder bidder, double amount) {
         super();
-        this.bidder = bidder;
-        this.bidAmount = bidAmount;
-        this.timestamp = LocalDateTime.now();
+        if (bidder == null) {
+            throw new IllegalArgumentException("Bidder cannot be null.");
+        }
+        this.bidderId = bidder.getId();
+        this.bidderUsername = bidder.getUsername();
+        this.amount = amount;
     }
 
-    public double getAmount() {
-        return this.bidAmount;
+    public BidTransaction(String id, Instant createdAt, Instant lastModified, String bidderId, String bidderUsername, double amount) {
+        super(id, createdAt, lastModified);
+        this.bidderId = bidderId;
+        this.bidderUsername = bidderUsername;
+        this.amount = amount;
     }
 
-    public Bidder getBidder() {
-        return bidder;
-    }
+    public String getBidderId() { return bidderId; }
+    public String getBidderUsername() { return bidderUsername; }
+    public double getAmount() { return amount; }
 
-    public double getBidAmount() {
-        return bidAmount;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
 }

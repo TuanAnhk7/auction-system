@@ -27,7 +27,7 @@ public class AuctionServer {
     private final ExecutorService clientPool = Executors.newFixedThreadPool(8);
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final Set<ClientHandler> clients = ConcurrentHashMap.newKeySet();
-    private final AuctionManager auctionManager = AuctionManager.getInstance();
+    private final AuctionManager auctionManager = AuctionManager.getInstance(null);
 
     public static void main(String[] args) {
         new AuctionServer().start();

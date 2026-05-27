@@ -24,7 +24,7 @@ public class Auction extends BaseEntity {
     private AuctionStatus status;
 
     private final List<AuctionObserver> observers = new ArrayList<>();
-    public Auction(Item item, Instant startTime, Instant endTime, String sellerUsername) {
+    public Auction(Item item, LocalDateTime startTime, LocalDateTime endTime, String sellerUsername) {
         super();
         if (item == null) throw new IllegalArgumentException("Item cannot be null.");
         if (startTime == null) throw new IllegalArgumentException("Start time cannot be null.");
@@ -33,10 +33,16 @@ public class Auction extends BaseEntity {
 
         this.item = item;
         this.sellerUsername = sellerUsername;
+        this.startTime = startTime;
         this.endTime = endTime;
         this.bidHistory = new ArrayList<>();
         this.currentHighestBid = item.getStartingPrice();
         this.status = (startTime.isAfter(LocalDateTime.now())) ? AuctionStatus.PENDING : AuctionStatus.OPEN;
+    }
+
+    // Convenience constructor: start now and seller taken from item
+    public Auction(Item item, LocalDateTime endTime) {
+        this(item, LocalDateTime.now(), endTime, item.getSellerUsername());
     }
 
     public Auction(String id, Instant createdAt, Instant lastModified, Item item, String sellerUsername, LocalDateTime startTime, LocalDateTime endTime, List<BidTransaction> bidHistory, double currentHighestBid, Bidder highestBidder, AuctionStatus status) {

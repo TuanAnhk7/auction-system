@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +32,9 @@ class AuctionConcurrencyTest {
 
         Art testArt = new Art("Test Art", "Concurrent bid test", 100.0, startTime, endTime, "testSeller", "Artist", 2020);
 
-        Auction auction = new Auction(testArt, startTime, endTime, "testSeller");
+        LocalDateTime startLdt = LocalDateTime.ofInstant(startTime, ZoneId.systemDefault());
+        LocalDateTime endLdt = LocalDateTime.ofInstant(endTime, ZoneId.systemDefault());
+        Auction auction = new Auction(testArt, startLdt, endLdt, "testSeller");
         auction.startAuction();
 
         List<Bidder> bidders = new ArrayList<>();
@@ -80,7 +83,9 @@ class AuctionConcurrencyTest {
 
         Art managedArt = new Art("Managed Art", "Manager concurrency test", 300.0, startTime, endTime, "testSeller", "Artist", 2021);
 
-        Auction auction = new Auction(managedArt, startTime, endTime, "testSeller");
+        LocalDateTime startLdt = LocalDateTime.ofInstant(startTime, ZoneId.systemDefault());
+        LocalDateTime endLdt = LocalDateTime.ofInstant(endTime, ZoneId.systemDefault());
+        Auction auction = new Auction(managedArt, startLdt, endLdt, "testSeller");
         auction.startAuction();
         manager.addAuction(auction);
 

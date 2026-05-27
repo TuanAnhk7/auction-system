@@ -2,16 +2,14 @@ package auction.common.model.network;
 
 import java.io.Serializable;
 
-public class DeleteItemRequest implements Serializable { //gửi yêu cầu xóa đi
-    private static final long serialVersionUID = 1L;
+public class DeleteItemRequest implements Serializable {
+    private final String itemId;
 
-    private String auctionId;
-
-    public DeleteItemRequest(String auctionId) {
-        this.auctionId = auctionId;
+    public DeleteItemRequest(String itemId) {
+        this.itemId = itemId;
     }
 
-    public String getAuctionId() {
-        return auctionId;
+    public String getItemId() {
+        return itemId;
     }
 }

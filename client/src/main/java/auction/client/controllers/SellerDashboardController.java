@@ -9,21 +9,21 @@ import auction.common.model.network.BidResponse;
 import auction.common.model.network.CreateAuctionRequest;
 import auction.common.model.network.CreateAuctionResponse;
 import auction.common.model.network.GetAuctionListResponse;
+import auction.common.model.network.UpdateItemRequest;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableView;
-import javafx.scene.control.TextArea;
-import javafx.scene.control.TextField;
+import javafx.geometry.Insets;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.layout.GridPane;
+import javafx.util.Pair;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public class SellerDashboardController implements Observer {
     @FXML
@@ -37,10 +37,6 @@ public class SellerDashboardController implements Observer {
     @FXML
     private TextArea descriptionArea;
     @FXML
-    private TextField specificProp1Field;
-    @FXML
-    private TextField specificProp2Field;
-    @FXML
     private TableView<AuctionView> myAuctionsTable;
     @FXML
     private TableColumn<AuctionView, String> myProductColumn;
@@ -52,6 +48,13 @@ public class SellerDashboardController implements Observer {
     private TableColumn<AuctionView, String> myStatusColumn;
     @FXML
     private TableColumn<AuctionView, String> myEndTimeColumn;
+
+    @FXML
+    private Button btnEdit;
+    @FXML
+    private Button btnDelete;
+    @FXML
+    private Button btnUpdateStatus;
 
     private final ObservableList<AuctionView> myAuctionSource = FXCollections.observableArrayList();
     private FilteredList<AuctionView> myAuctions;
@@ -70,6 +73,23 @@ public class SellerDashboardController implements Observer {
 
         myAuctions = new FilteredList<>(myAuctionSource, auction -> true);
         myAuctionsTable.setItems(myAuctions);
+        btnEdit.setDisable(true);
+        btnDelete.setDisable(true);
+        btnUpdateStatus.setDisable(true);
+
+        myAuctionsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
+            if (newSelection != null) {
+                String status = newSelection.getStatus();
+                boolean isWaiting = "WAITING".equalsIgnoreCase(status);
+                btnEdit.setDisable(!isWaiting);
+                btnDelete.setDisable(!isWaiting);
+                btnUpdateStatus.setDisable(!isWaiting);
+            } else {
+                btnEdit.setDisable(true);
+                btnDelete.setDisable(true);
+                btnUpdateStatus.setDisable(true);
+            }
+        });
 
         try {
             AuctionClient.getInstance().connect("127.0.0.1", 8080);
@@ -88,10 +108,6 @@ public class SellerDashboardController implements Observer {
             String itemType = itemTypeComboBox.getValue();
             double startingPrice = Double.parseDouble(startingPriceField.getText().trim());
             long durationMinutes = Long.parseLong(durationMinutesField.getText().trim());
-            String prop1 = specificProp1Field.getText().trim();
-            int prop2 = Integer.parseInt(specificProp2Field.getText().trim());
-
-            validateCreateAuctionForm(itemName, description, itemType, startingPrice, durationMinutes, prop1);
 
             AuctionClient.getInstance().sendCreateAuctionRequest(new CreateAuctionRequest(
                     ClientSession.getUsername(),
@@ -101,8 +117,8 @@ public class SellerDashboardController implements Observer {
                     itemType,
                     LocalDateTime.now(),
                     durationMinutes,
-                    prop1,
-                    prop2
+                    "",
+                    0
             ));
         } catch (NumberFormatException e) {
             showAlert(Alert.AlertType.ERROR, "Dữ liệu không hợp lệ", "Giá khởi điểm và thời lượng phải là số hợp lệ.");
@@ -128,6 +144,85 @@ public class SellerDashboardController implements Observer {
         MainClient.changeScene("auction-list-view.fxml");
     }
 
+    @FXML
+    private void handleEditAuction() {
+        AuctionView selected = myAuctionsTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            return;
+        }
+
+        Dialog<Pair<String, String>> dialog = new Dialog<>();
+        dialog.setTitle("Sửa thông tin vật phẩm");
+        dialog.setHeaderText("Chỉnh sửa thông tin cho: " + selected.getItemName());
+
+        ButtonType saveButtonType = new ButtonType("Lưu", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setPadding(new Insets(20, 150, 10, 10));
+
+        TextField newNameField = new TextField();
+        newNameField.setText(selected.getItemName());
+        TextField newPriceField = new TextField();
+        newPriceField.setText(String.valueOf(selected.getStartingPrice()));
+        TextArea newDescriptionArea = new TextArea();
+        newDescriptionArea.setText(selected.getDescription());
+
+        grid.add(new Label("Tên mới:"), 0, 0);
+        grid.add(newNameField, 1, 0);
+        grid.add(new Label("Giá mới:"), 0, 1);
+        grid.add(newPriceField, 1, 1);
+        grid.add(new Label("Mô tả mới:"), 0, 2);
+        grid.add(newDescriptionArea, 1, 2);
+
+        dialog.getDialogPane().setContent(grid);
+
+        dialog.setResultConverter(dialogButton -> {
+            if (dialogButton == saveButtonType) {
+                return new Pair<>(newNameField.getText(), newPriceField.getText());
+            }
+            return null;
+        });
+
+        Optional<Pair<String, String>> result = dialog.showAndWait();
+
+        result.ifPresent(pair -> {
+            try {
+                String newName = pair.getKey();
+                double newPrice = Double.parseDouble(pair.getValue());
+                String newDescription = newDescriptionArea.getText();
+
+                UpdateItemRequest request = new UpdateItemRequest(selected.getAuctionId(), newName, newPrice, newDescription);
+                AuctionClient.getInstance().sendUpdateItemRequest(request);
+
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Yêu cầu cập nhật đã được gửi đi.");
+                handleRefreshMyAuctions();
+            } catch (NumberFormatException e) {
+                showAlert(Alert.AlertType.ERROR, "Lỗi", "Giá phải là một con số hợp lệ.");
+            } catch (IOException e) {
+                showAlert(Alert.AlertType.ERROR, "Lỗi mạng", "Không gửi được yêu cầu cập nhật.");
+            }
+        });
+    }
+
+    @FXML
+    private void handleDeleteAuction() {
+        AuctionView selected = myAuctionsTable.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            showAlert(Alert.AlertType.INFORMATION, "Chức năng", "Chức năng Xóa chưa được triển khai cho vật phẩm: " + selected.getItemName());
+        }
+    }
+
+    @FXML
+    private void handleUpdateStatus() {
+        AuctionView selected = myAuctionsTable.getSelectionModel().getSelectedItem();
+        if (selected != null) {
+            showAlert(Alert.AlertType.INFORMATION, "Chức năng", "Chức năng Cập nhật trạng thái chưa được triển khai cho vật phẩm: " + selected.getItemName());
+        }
+    }
+
     @Override
     public void onBidResponse(BidResponse response) {
     }
@@ -147,46 +242,17 @@ public class SellerDashboardController implements Observer {
             if (response.isSuccess()) {
                 clearCreateAuctionForm();
                 showAlert(Alert.AlertType.INFORMATION, "Tạo phiên thành công", response.getMessage());
+                handleRefreshMyAuctions();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Tạo phiên thất bại", response.getMessage());
             }
         });
     }
 
-    private void validateCreateAuctionForm(
-            String itemName,
-            String description,
-            String itemType,
-            double startingPrice,
-            long durationMinutes,
-            String prop1
-    ) {
-        if (itemName.isBlank()) {
-            throw new IllegalArgumentException("Tên sản phẩm không được để trống.");
-        }
-        if (description.isBlank()) {
-            throw new IllegalArgumentException("Mô tả không được để trống.");
-        }
-        if (itemType == null || itemType.isBlank()) {
-            throw new IllegalArgumentException("Vui lòng chọn loại vật phẩm.");
-        }
-        if (startingPrice <= 0) {
-            throw new IllegalArgumentException("Giá khởi điểm phải lớn hơn 0.");
-        }
-        if (durationMinutes <= 0) {
-            throw new IllegalArgumentException("Thời lượng đấu giá phải lớn hơn 0 phút.");
-        }
-        if (prop1.isBlank()) {
-            throw new IllegalArgumentException("Thông tin đặc trưng (Họa sĩ/Nguồn gốc) không được để trống.");
-        }
-    }
-
     private void clearCreateAuctionForm() {
         productNameField.clear();
         startingPriceField.clear();
         descriptionArea.clear();
-        specificProp1Field.clear();
-        specificProp2Field.clear();
         itemTypeComboBox.setValue("Art");
         durationMinutesField.setText("60");
     }

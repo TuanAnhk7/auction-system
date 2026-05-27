@@ -56,6 +56,8 @@ public class ClientHandler implements Runnable {
                     handleUpdateItemRequest(request);
                 } else if (receivedData instanceof DeleteItemRequest request) {
                     handleDeleteItemRequest(request);
+                } else if (receivedData instanceof ChangeStatusRequest request) {
+                    handleChangeStatusRequest(request);
                 } else if (receivedData instanceof GetAuctionListRequest) {
                     handleAuctionListRequest();
                 }
@@ -263,19 +265,23 @@ public class ClientHandler implements Runnable {
 
     private void handleUpdateItemRequest(UpdateItemRequest request) {
         try {
-            UserAccount user = requireRole(Role.SELLER); // Chỉ người bán mới có thể sửa sản phẩm của họ
-            Auction updatedAuction = auctionManager.updateItem(
-                    request.getAuctionId(),
-                    request.getName(),
-                    request.getDescription(),
-                    request.getStartingPrice(),
-                    request.getItemType(),
-                    request.getSpecificProp1(),
-                    request.getSpecificProp2()
+            UserAccount user = requireRole(Role.SELLER);
+            Auction auctionToUpdate = auctionManager.findById(request.getItemId())
+                    .orElseThrow(() -> new AuctionException("Không tìm thấy phiên đấu giá để cập nhật."));
+
+            if (!auctionToUpdate.getSellerUsername().equals(user.getUsername())) {
+                throw new AuctionException("Bạn không có quyền sửa phiên đấu giá này.");
+            }
+
+            auctionManager.updateItem(
+                    request.getItemId(),
+                    request.getNewName(),
+                    request.getNewPrice(),
+                    request.getNewDescription()
             );
-            AuctionView updatedAuctionView = toAuctionView(updatedAuction);
-            send(new UpdateItemResponse(true, "Cập nhật sản phẩm thành công.", updatedAuctionView));
-            server.broadcastAuctionList(buildAuctionListResponse()); // Phát sóng danh sách đấu giá đã cập nhật
+
+            send(new UpdateItemResponse(true, "Cập nhật sản phẩm thành công.", null));
+            server.broadcastAuctionList(buildAuctionListResponse());
         } catch (AuctionException e) {
             send(new UpdateItemResponse(false, "Không thể cập nhật sản phẩm: " + e.getMessage(), null));
         } catch (Exception e) {
@@ -287,27 +293,42 @@ public class ClientHandler implements Runnable {
     private void handleDeleteItemRequest(DeleteItemRequest request) {
         try {
             UserAccount user = requireRole(Role.SELLER);
-            // Kiểm tra xem người dùng có quyền xóa phiên đấu giá này không
-            Auction auctionToDelete = auctionManager.findById(request.getAuctionId())
+            Auction auctionToDelete = auctionManager.findById(request.getItemId())
                     .orElseThrow(() -> new AuctionException("Không tìm thấy phiên đấu giá để xóa."));
 
             if (!auctionToDelete.getSellerUsername().equals(user.getUsername())) {
                 throw new AuctionException("Bạn không có quyền xóa phiên đấu giá này.");
             }
             
-            // Chỉ cho phép xóa khi phiên đấu giá ở trạng thái OPEN hoặc CANCELED
-            if (auctionToDelete.getStatus() != AuctionStatus.OPEN && auctionToDelete.getStatus() != AuctionStatus.CANCELED && auctionToDelete.getStatus() != AuctionStatus.PENDING) {
-                throw new AuctionException("Không thể xóa phiên đấu giá đang RUNNING hoặc đã FINISHED/PAID.");
+            if (auctionToDelete.getStatus() != AuctionStatus.PENDING) {
+                throw new AuctionException("Chỉ có thể xóa phiên đấu giá đang ở trạng thái PENDING.");
             }
 
-            auctionManager.removeAuction(request.getAuctionId());
-            send(new DeleteItemResponse(true, "Xóa sản phẩm thành công. Phiên đấu giá đã được lưu trữ."));
+            auctionManager.removeAuction(request.getItemId());
+            send(new DeleteItemResponse(true, "Xóa sản phẩm thành công."));
             server.broadcastAuctionList(buildAuctionListResponse());
         } catch (AuctionException e) {
             send(new DeleteItemResponse(false, "Không thể xóa sản phẩm: " + e.getMessage()));
         } catch (Exception e) {
             send(new DeleteItemResponse(false, "Lỗi không xác định khi xóa sản phẩm: " + e.getMessage()));
             e.printStackTrace();
+        }
+    }
+
+    private void handleChangeStatusRequest(ChangeStatusRequest request) {
+        try {
+            UserAccount user = requireRole(Role.SELLER);
+            Auction auctionToUpdate = auctionManager.findById(request.getItemId())
+                    .orElseThrow(() -> new AuctionException("Không tìm thấy phiên đấu giá."));
+
+            if (!auctionToUpdate.getSellerUsername().equals(user.getUsername())) {
+                throw new AuctionException("Bạn không có qu-yền thay đổi trạng thái phiên đấu giá này.");
+            }
+
+            auctionManager.updateAuctionStatus(request.getItemId(), request.getNewStatus().name());
+            server.broadcastAuctionList(buildAuctionListResponse());
+        } catch (AuctionException e) {
+            // Gửi lại lỗi cho client
         }
     }
 
@@ -323,7 +344,6 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    // Mỗi socket giữ user đã đăng nhập để server tự kiểm tra quyền cho các request sau đó.
     private void ensureAuthenticated() throws AuctionException {
         if (authenticatedUser == null) {
             throw new AuctionException("Bạn chưa đăng nhập.");
@@ -350,7 +370,7 @@ public class ClientHandler implements Runnable {
         Item item = auction.getItem();
         String creatorName = item.getDisplayCreator();
         if (creatorName == null || creatorName.isBlank()) {
-            creatorName = auction.getSellerUsername(); // Fallback về tên người bán nếu item không có creator
+            creatorName = auction.getSellerUsername();
         }
         if (creatorName == null || creatorName.isBlank()) {
             creatorName = "Không rõ";

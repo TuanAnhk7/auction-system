@@ -197,6 +197,24 @@ public class AuctionManager {
         return auction;
     }
 
+    public Auction updateItem(String auctionId, String newName, double newPrice, String newDescription) throws AuctionException {
+        Auction auction = activeAuctions.get(auctionId);
+        if (auction == null) {
+            throw new AuctionException("Auction not found or is not active.");
+        }
+
+        if (auction.getStatus() != AuctionStatus.OPEN && auction.getStatus() != AuctionStatus.PENDING) {
+            throw new AuctionException("Cannot update item for an auction that is not OPEN or PENDING.");
+        }
+
+        Item item = auction.getItem();
+        item.setName(newName);
+        item.setDescription(newDescription);
+        item.setStartingPrice(newPrice);
+
+        return auction;
+    }
+
     public Auction updateItem(
             String auctionId,
             String name,

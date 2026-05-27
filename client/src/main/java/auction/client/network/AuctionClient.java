@@ -12,6 +12,7 @@ import auction.common.model.network.LoginRequest;
 import auction.common.model.network.LoginResponse;
 import auction.common.model.network.RegisterRequest;
 import auction.common.model.network.RegisterResponse;
+import auction.common.model.network.UpdateItemRequest;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -96,6 +97,13 @@ public final class AuctionClient {
     }
 
     public synchronized void sendAdminAuctionActionRequest(AdminAuctionActionRequest request) throws IOException {
+        ensureConnected();
+        out.writeObject(request);
+        out.flush();
+        out.reset();
+    }
+    
+    public synchronized void sendUpdateItemRequest(UpdateItemRequest request) throws IOException {
         ensureConnected();
         out.writeObject(request);
         out.flush();

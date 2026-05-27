@@ -5,6 +5,11 @@ import auction.common.model.BaseEntity;
 import java.time.Instant;
 
 public class Item extends BaseEntity {
+    public enum Status {
+        WAITING,
+        RUNNING,
+        FINISHED
+    }
     private String name;
     private String description;
     private double startingPrice;
@@ -12,6 +17,7 @@ public class Item extends BaseEntity {
     private Instant startTime;
     private Instant endTime;
     private String sellerId;
+    private Status status;
 
     public Item(String id, String name, String description, double startingPrice, Instant startTime, Instant endTime, String sellerId) {
         super(id, Instant.now(), Instant.now());
@@ -22,6 +28,7 @@ public class Item extends BaseEntity {
         this.startTime = startTime;
         this.endTime = endTime;
         this.sellerId = sellerId;
+        this.status = Status.WAITING;
     }
 
     // Constructor mới để tạo Item mà không cần ID
@@ -34,6 +41,16 @@ public class Item extends BaseEntity {
         this.startTime = startTime;
         this.endTime = endTime;
         this.sellerId = sellerId;
+        this.status = Status.WAITING;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+        touch();
     }
 
     public String getName() { return name; }

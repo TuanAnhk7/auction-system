@@ -11,7 +11,6 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.Priority?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane prefHeight="680.0" prefWidth="1120.0"
@@ -62,6 +61,11 @@
                         <TableColumn fx:id="myEndTimeColumn" prefWidth="240.0" text="Kết thúc lúc"/>
                     </columns>
                 </TableView>
+                <HBox spacing="10.0">
+                    <Button fx:id="btnEdit" text="Sửa" onAction="#handleEditAuction"/>
+                    <Button fx:id="btnDelete" text="Xóa" onAction="#handleDeleteAuction"/>
+                    <Button fx:id="btnUpdateStatus" text="Cập nhật trạng thái" onAction="#handleUpdateStatus"/>
+                </HBox>
             </VBox>
         </VBox>
     </center>

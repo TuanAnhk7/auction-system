@@ -75,4 +75,17 @@ public class Seller extends User {
         if (removed) { touch(); }
         return removed;
     }
+
+    public boolean startAuction(String itemId) {
+        Item item = products.get(itemId);
+        if (item == null) {
+            return false;
+        }
+        if (item.getStatus() == Item.Status.WAITING) {
+            item.setStatus(Item.Status.RUNNING);
+            touch();
+            return true;
+        }
+        return false;
+    }
 }

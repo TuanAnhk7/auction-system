@@ -3,13 +3,13 @@ package auction.common.model.network;
 import java.io.Serializable;
 
 public class DeleteItemRequest implements Serializable {
-    private final String itemId;
+    private final String auctionId;
 
-    public DeleteItemRequest(String itemId) {
-        this.itemId = itemId;
+    public DeleteItemRequest(String auctionId) {
+        this.auctionId = auctionId;
     }
 
-    public String getItemId() {
-        return itemId;
+    public String getAuctionId() {
+        return auctionId;
     }
 }

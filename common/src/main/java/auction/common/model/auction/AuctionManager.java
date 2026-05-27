@@ -122,14 +122,20 @@ public class AuctionManager {
         if (bidderAccount == null) {
             throw new InvalidBidException("Bidder account not found.");
         }
-        if (bidderAccount.getAccountBalance() < bidAmount) {
-            throw new InvalidBidException("Bidder balance is not enough for this bid.");
-        }
 
         Bidder previousHighestBidder = auction.getHighestBidder();
         double previousHighestBidAmount = auction.getCurrentHighestBid();
 
-        Bidder currentBidder = new Bidder(bidderAccount.getUsername(), bidderAccount.getPassword(), bidderAccount.getUsername(), bidderAccount.getAccountBalance());
+        double availableBalance = bidderAccount.getAccountBalance();
+        if (previousHighestBidder != null && previousHighestBidder.getUsername() != null && previousHighestBidder.getUsername().equals(bidderUsername)) {
+            availableBalance += previousHighestBidAmount;
+        }
+
+        if (availableBalance < bidAmount) {
+            throw new InvalidBidException("Bidder balance is not enough for this bid.");
+        }
+
+        Bidder currentBidder = new Bidder(bidderAccount.getUsername(), bidderAccount.getPassword(), bidderAccount.getUsername(), availableBalance);
 
         BidTransaction transaction = auction.placeBid(currentBidder, bidAmount);
 
@@ -203,14 +209,15 @@ public class AuctionManager {
             throw new AuctionException("Auction not found or is not active.");
         }
 
-        if (auction.getStatus() != AuctionStatus.OPEN && auction.getStatus() != AuctionStatus.PENDING) {
-            throw new AuctionException("Cannot update item for an auction that is not OPEN or PENDING.");
-        }
-
         Item item = auction.getItem();
         item.setName(newName);
         item.setDescription(newDescription);
         item.setStartingPrice(newPrice);
+
+        if (auction.getBidHistory().isEmpty()) {
+            item.setCurrentPrice(newPrice);
+            auction.setCurrentHighestBid(newPrice);
+        }
 
         return auction;
     }
@@ -229,14 +236,15 @@ public class AuctionManager {
             throw new AuctionException("Auction not found or is not active.");
         }
 
-        if (auction.getStatus() != AuctionStatus.OPEN && auction.getStatus() != AuctionStatus.PENDING) {
-            throw new AuctionException("Cannot update item for an auction that is not OPEN or PENDING.");
-        }
-
         Item item = auction.getItem();
         item.setName(name);
         item.setDescription(description);
         item.setStartingPrice(startingPrice);
+
+        if (auction.getBidHistory().isEmpty()) {
+            item.setCurrentPrice(startingPrice);
+            auction.setCurrentHighestBid(startingPrice);
+        }
 
         if ("art".equalsIgnoreCase(itemType) && item instanceof Art art) {
             art.setArtist(specificProp1);

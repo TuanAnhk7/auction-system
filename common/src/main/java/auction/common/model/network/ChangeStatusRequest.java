@@ -4,16 +4,16 @@ import auction.common.model.auction.AuctionStatus;
 import java.io.Serializable;
 
 public class ChangeStatusRequest implements Serializable {
-    private final String itemId;
+    private final String auctionId;
     private final AuctionStatus newStatus;
 
-    public ChangeStatusRequest(String itemId, AuctionStatus newStatus) {
-        this.itemId = itemId;
+    public ChangeStatusRequest(String auctionId, AuctionStatus newStatus) {
+        this.auctionId = auctionId;
         this.newStatus = newStatus;
     }
 
-    public String getItemId() {
-        return itemId;
+    public String getAuctionId() {
+        return auctionId;
     }
 
     public AuctionStatus getNewStatus() {

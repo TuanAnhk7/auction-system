@@ -3,20 +3,20 @@ package auction.common.model.network;
 import java.io.Serializable;
 
 public class UpdateItemRequest implements Serializable {
-    private final String itemId;
+    private final String auctionId;
     private final String newName;
     private final double newPrice;
     private final String newDescription;
 
-    public UpdateItemRequest(String itemId, String newName, double newPrice, String newDescription) {
-        this.itemId = itemId;
+    public UpdateItemRequest(String auctionId, String newName, double newPrice, String newDescription) {
+        this.auctionId = auctionId;
         this.newName = newName;
         this.newPrice = newPrice;
         this.newDescription = newDescription;
     }
 
-    public String getItemId() {
-        return itemId;
+    public String getAuctionId() {
+        return auctionId;
     }
 
     public String getNewName() {

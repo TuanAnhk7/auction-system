@@ -1,6 +1,9 @@
 package auction.common.model.user;
 
+import auction.common.model.item.Art;
 import auction.common.model.item.Item;
+import auction.common.model.item.Antique;
+// import auction.common.model.item.Art; // Import class Art của bạn tại đây
 
 import java.time.Instant;
 import java.util.ArrayList;
@@ -39,6 +42,8 @@ public class Seller extends User {
         if (products.containsKey(item.getId())) {
             return false;
         }
+        // Mặc định sản phẩm vừa đăng ký sẽ ở trạng thái chờ Admin duyệt
+        item.setStatus(Item.Status.PENDING);
         products.put(item.getId(), item);
         touch();
         return true;
@@ -69,23 +74,58 @@ public class Seller extends User {
         return false;
     }
 
+    public boolean updateAntiqueProduct(String itemId, String newName, String newDescription,
+                                        double newStartingPrice, Instant newStartTime, Instant newEndTime,
+                                        String newOrigin, int newEstimatedAge) {
+        if (updateProduct(itemId, newName, newDescription, newStartingPrice, newStartTime, newEndTime)) {
+            Item item = products.get(itemId);
+            if (item instanceof Antique) {
+                Antique antique = (Antique) item;
+                antique.setOrigin(newOrigin);
+                antique.setEstimatedAge(newEstimatedAge);
+                touch();
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean updateArtProduct(String itemId, String newName, String newDescription,
+                                    double newStartingPrice, Instant newStartTime, Instant newEndTime,
+                                    String newArtist) {
+        if (updateProduct(itemId, newName, newDescription, newStartingPrice, newStartTime, newEndTime)) {
+            Item item = products.get(itemId);
+            if (item instanceof Art) {
+                Art art = (Art) item;
+                art.setArtist(newArtist);
+                touch();
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean updateFullProduct(String oldItemId, Item updatedItem) {
+        if (oldItemId == null || updatedItem == null || updatedItem.getId() == null) {
+            return false;
+        }
+        
+        Item oldItem = products.get(oldItemId);
+        if (oldItem == null || oldItem.getStatus() != Item.Status.PENDING) {
+            return false;
+        }
+
+        products.remove(oldItemId);
+        updatedItem.setStatus(Item.Status.PENDING);
+        products.put(updatedItem.getId(), updatedItem);
+        
+        touch();
+        return true;
+    }
+
     public boolean removeProduct(String itemId) {
         Item removedItem = products.remove(itemId);
         boolean removed = (removedItem != null);
         if (removed) { touch(); }
         return removed;
-    }
-
-    public boolean startAuction(String itemId) {
-        Item item = products.get(itemId);
-        if (item == null) {
-            return false;
-        }
-        if (item.getStatus() == Item.Status.WAITING) {
-            item.setStatus(Item.Status.RUNNING);
-            touch();
-            return true;
-        }
-        return false;
     }
 }

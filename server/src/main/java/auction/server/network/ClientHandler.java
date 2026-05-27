@@ -187,7 +187,7 @@ public class ClientHandler implements Runnable {
         if (request.getUsername() == null || request.getUsername().isBlank()
                 || request.getPassword() == null || request.getPassword().isBlank()
                 || request.getRole() == null) {
-            send(new RegisterResponse(false, "Thông tin đăng ký không hợp lệ."));
+            send(new RegisterResponse(false, "Thông đăng ký không hợp lệ."));
             return;
         }
 
@@ -208,9 +208,9 @@ public class ClientHandler implements Runnable {
     private void handleBidRequest(BidRequest request) {
         try {
             UserAccount user = requireRole(Role.BIDDER);
-            auctionManager.placeBidByItemId(request.getItemId(), user.getUsername(), request.getBidAmount());
+            auctionManager.placeBidByItemId(request.getAuctionId(), user.getUsername(), request.getBidAmount());
 
-            Auction updatedAuction = auctionManager.findByItemId(request.getItemId())
+            Auction updatedAuction = auctionManager.findByItemId(request.getAuctionId())
                     .orElseThrow(() -> new InvalidBidException("Khong tim thay phien dau gia sau khi cap nhat."))
                     ;
 
@@ -266,7 +266,7 @@ public class ClientHandler implements Runnable {
     private void handleUpdateItemRequest(UpdateItemRequest request) {
         try {
             UserAccount user = requireRole(Role.SELLER);
-            Auction auctionToUpdate = auctionManager.findById(request.getItemId())
+            Auction auctionToUpdate = auctionManager.findById(request.getAuctionId())
                     .orElseThrow(() -> new AuctionException("Không tìm thấy phiên đấu giá để cập nhật."));
 
             if (!auctionToUpdate.getSellerUsername().equals(user.getUsername())) {
@@ -274,7 +274,7 @@ public class ClientHandler implements Runnable {
             }
 
             auctionManager.updateItem(
-                    request.getItemId(),
+                    request.getAuctionId(),
                     request.getNewName(),
                     request.getNewPrice(),
                     request.getNewDescription()
@@ -293,18 +293,14 @@ public class ClientHandler implements Runnable {
     private void handleDeleteItemRequest(DeleteItemRequest request) {
         try {
             UserAccount user = requireRole(Role.SELLER);
-            Auction auctionToDelete = auctionManager.findById(request.getItemId())
+            Auction auctionToDelete = auctionManager.findById(request.getAuctionId())
                     .orElseThrow(() -> new AuctionException("Không tìm thấy phiên đấu giá để xóa."));
 
             if (!auctionToDelete.getSellerUsername().equals(user.getUsername())) {
                 throw new AuctionException("Bạn không có quyền xóa phiên đấu giá này.");
             }
-            
-            if (auctionToDelete.getStatus() != AuctionStatus.PENDING) {
-                throw new AuctionException("Chỉ có thể xóa phiên đấu giá đang ở trạng thái PENDING.");
-            }
 
-            auctionManager.removeAuction(request.getItemId());
+            auctionManager.removeAuction(request.getAuctionId());
             send(new DeleteItemResponse(true, "Xóa sản phẩm thành công."));
             server.broadcastAuctionList(buildAuctionListResponse());
         } catch (AuctionException e) {
@@ -318,14 +314,14 @@ public class ClientHandler implements Runnable {
     private void handleChangeStatusRequest(ChangeStatusRequest request) {
         try {
             UserAccount user = requireRole(Role.SELLER);
-            Auction auctionToUpdate = auctionManager.findById(request.getItemId())
+            Auction auctionToUpdate = auctionManager.findById(request.getAuctionId())
                     .orElseThrow(() -> new AuctionException("Không tìm thấy phiên đấu giá."));
 
             if (!auctionToUpdate.getSellerUsername().equals(user.getUsername())) {
-                throw new AuctionException("Bạn không có qu-yền thay đổi trạng thái phiên đấu giá này.");
+                throw new AuctionException("Bạn không có quyền thay đổi trạng thái phiên đấu giá này.");
             }
 
-            auctionManager.updateAuctionStatus(request.getItemId(), request.getNewStatus().name());
+            auctionManager.updateAuctionStatus(request.getAuctionId(), request.getNewStatus().name());
             server.broadcastAuctionList(buildAuctionListResponse());
         } catch (AuctionException e) {
             // Gửi lại lỗi cho client

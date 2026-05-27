@@ -6,9 +6,7 @@ import java.time.Instant;
 
 public class Item extends BaseEntity {
     public enum Status {
-        WAITING,
-        RUNNING,
-        FINISHED
+        OPEN, PENDING, FINISHED
     }
     private String name;
     private String description;
@@ -18,6 +16,7 @@ public class Item extends BaseEntity {
     private Instant endTime;
     private String sellerId;
     private Status status;
+    private String highestBidderId;
 
     public Item(String id, String name, String description, double startingPrice, Instant startTime, Instant endTime, String sellerId) {
         super(id, Instant.now(), Instant.now());
@@ -28,7 +27,7 @@ public class Item extends BaseEntity {
         this.startTime = startTime;
         this.endTime = endTime;
         this.sellerId = sellerId;
-        this.status = Status.WAITING;
+        this.status = Status.PENDING;
     }
 
     // Constructor mới để tạo Item mà không cần ID
@@ -41,7 +40,7 @@ public class Item extends BaseEntity {
         this.startTime = startTime;
         this.endTime = endTime;
         this.sellerId = sellerId;
-        this.status = Status.WAITING;
+        this.status = Status.PENDING;
     }
 
     public Status getStatus() {
@@ -75,6 +74,11 @@ public class Item extends BaseEntity {
         this.startingPrice = startingPrice;
         touch();
     }
+    
+    public void setCurrentPrice(double currentPrice) {
+        this.currentPrice = currentPrice;
+        touch();
+    }
 
     public void updateCurrentPrice(double newPrice) {
         if (newPrice > this.currentPrice) {
@@ -103,5 +107,14 @@ public class Item extends BaseEntity {
 
     public String getDisplayCreator() {
         return sellerId;
+    }
+
+    public String getHighestBidderId() {
+        return highestBidderId;
+    }
+
+    public void setHighestBidderId(String highestBidderId) {
+        this.highestBidderId = highestBidderId;
+        touch();
     }
 }

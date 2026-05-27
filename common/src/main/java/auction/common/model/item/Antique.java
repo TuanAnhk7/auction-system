@@ -20,6 +20,21 @@ public class Antique extends Item {
         this.estimatedAge = estimatedAge;
     }
 
+    // Constructor cho phép truyền ID (dùng khi cập nhật/giữ nguyên ID cũ)
+    public Antique(String id,
+                   String name,
+                   String description,
+                   double startingPrice,
+                   Instant startTime,
+                   Instant endTime,
+                   String sellerId,
+                   String origin,
+                   int estimatedAge) {
+        super(id, name, description, startingPrice, startTime, endTime, sellerId);
+        this.origin = origin;
+        this.estimatedAge = estimatedAge;
+    }
+
     @Override
     public String getCategory() {
         return "Antique";

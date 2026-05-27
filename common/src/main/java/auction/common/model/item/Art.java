@@ -20,6 +20,21 @@ public class Art extends Item {
         this.yearCreated = yearCreated;
     }
 
+    // Constructor cho phép truyền ID (dùng khi cập nhật/giữ nguyên ID cũ)
+    public Art(String id,
+               String name,
+               String description,
+               double startingPrice,
+               Instant startTime,
+               Instant endTime,
+               String sellerId,
+               String artist,
+               int yearCreated) {
+        super(id, name, description, startingPrice, startTime, endTime, sellerId);
+        this.artist = artist;
+        this.yearCreated = yearCreated;
+    }
+
     @Override
     public String getCategory() {
         return "Art";

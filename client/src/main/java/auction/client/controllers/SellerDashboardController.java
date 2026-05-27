@@ -4,12 +4,8 @@ import auction.client.ClientSession;
 import auction.client.MainClient;
 import auction.client.network.AuctionClient;
 import auction.client.network.Observer;
-import auction.common.model.network.AuctionView;
-import auction.common.model.network.BidResponse;
-import auction.common.model.network.CreateAuctionRequest;
-import auction.common.model.network.CreateAuctionResponse;
-import auction.common.model.network.GetAuctionListResponse;
-import auction.common.model.network.UpdateItemRequest;
+import auction.common.model.auction.AuctionStatus;
+import auction.common.model.network.*;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -79,11 +75,9 @@ public class SellerDashboardController implements Observer {
 
         myAuctionsTable.getSelectionModel().selectedItemProperty().addListener((obs, oldSelection, newSelection) -> {
             if (newSelection != null) {
-                String status = newSelection.getStatus();
-                boolean isWaiting = "WAITING".equalsIgnoreCase(status);
-                btnEdit.setDisable(!isWaiting);
-                btnDelete.setDisable(!isWaiting);
-                btnUpdateStatus.setDisable(!isWaiting);
+                btnEdit.setDisable(false);
+                btnDelete.setDisable(false);
+                btnUpdateStatus.setDisable(false);
             } else {
                 btnEdit.setDisable(true);
                 btnDelete.setDisable(true);
@@ -134,7 +128,7 @@ public class SellerDashboardController implements Observer {
         try {
             AuctionClient.getInstance().requestAuctionList();
         } catch (IOException e) {
-            showAlert(Alert.AlertType.ERROR, "Lỗi mạng", "Không tải lại được danh sách phiên của người bán.");
+            showAlert(Alert.AlertType.ERROR, "Lỗi mạng", "Không tải lại được danh sách. Vui lòng kiểm tra kết nối và thử lại.");
         }
     }
 
@@ -197,12 +191,10 @@ public class SellerDashboardController implements Observer {
                 UpdateItemRequest request = new UpdateItemRequest(selected.getAuctionId(), newName, newPrice, newDescription);
                 AuctionClient.getInstance().sendUpdateItemRequest(request);
 
-                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Yêu cầu cập nhật đã được gửi đi.");
-                handleRefreshMyAuctions();
             } catch (NumberFormatException e) {
                 showAlert(Alert.AlertType.ERROR, "Lỗi", "Giá phải là một con số hợp lệ.");
             } catch (IOException e) {
-                showAlert(Alert.AlertType.ERROR, "Lỗi mạng", "Không gửi được yêu cầu cập nhật.");
+                showAlert(Alert.AlertType.ERROR, "Lỗi mạng", "Không gửi được yêu cầu cập nhật. Vui lòng kiểm tra kết nối tới server và thử lại.");
             }
         });
     }
@@ -218,8 +210,17 @@ public class SellerDashboardController implements Observer {
     @FXML
     private void handleUpdateStatus() {
         AuctionView selected = myAuctionsTable.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            showAlert(Alert.AlertType.INFORMATION, "Chức năng", "Chức năng Cập nhật trạng thái chưa được triển khai cho vật phẩm: " + selected.getItemName());
+        if (selected == null) {
+            return;
+        }
+
+        try {
+            // Chuyển trạng thái sang RUNNING
+            ChangeStatusRequest request = new ChangeStatusRequest(selected.getAuctionId(), AuctionStatus.RUNNING);
+            AuctionClient.getInstance().sendChangeStatusRequest(request);
+            showAlert(Alert.AlertType.INFORMATION, "Thành công", "Đã gửi yêu cầu bắt đầu phiên đấu giá.");
+        } catch (IOException e) {
+            showAlert(Alert.AlertType.ERROR, "Lỗi mạng", "Không gửi được yêu cầu cập nhật trạng thái.");
         }
     }
 
@@ -245,6 +246,17 @@ public class SellerDashboardController implements Observer {
                 handleRefreshMyAuctions();
             } else {
                 showAlert(Alert.AlertType.ERROR, "Tạo phiên thất bại", response.getMessage());
+            }
+        });
+    }
+
+    @Override
+    public void onUpdateItemResponse(UpdateItemResponse response) {
+        Platform.runLater(() -> {
+            if (response.isSuccess()) {
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", response.getMessage());
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Cập nhật thất bại", response.getMessage());
             }
         });
     }

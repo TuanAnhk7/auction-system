@@ -142,7 +142,7 @@ public class Auction extends BaseEntity {
         if (status == AuctionStatus.PENDING && startTime != null && now.isAfter(startTime)) {
             this.status = AuctionStatus.RUNNING;
             statusChanged = true;
-            touch();
+touch();
         }
 
         if (status == AuctionStatus.RUNNING && now.isAfter(endTime)) {
@@ -182,6 +182,11 @@ public class Auction extends BaseEntity {
 
     public double getCurrentHighestBid() {
         return currentHighestBid;
+    }
+    
+    public void setCurrentHighestBid(double currentHighestBid) {
+        this.currentHighestBid = currentHighestBid;
+        touch();
     }
 
     public Bidder getHighestBidder() {

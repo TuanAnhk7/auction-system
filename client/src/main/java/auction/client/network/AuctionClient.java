@@ -1,18 +1,6 @@
 package auction.client.network;
 
-import auction.common.model.network.AdminAuctionActionRequest;
-import auction.common.model.network.AdminAuctionActionResponse;
-import auction.common.model.network.BidRequest;
-import auction.common.model.network.BidResponse;
-import auction.common.model.network.CreateAuctionRequest;
-import auction.common.model.network.CreateAuctionResponse;
-import auction.common.model.network.GetAuctionListRequest;
-import auction.common.model.network.GetAuctionListResponse;
-import auction.common.model.network.LoginRequest;
-import auction.common.model.network.LoginResponse;
-import auction.common.model.network.RegisterRequest;
-import auction.common.model.network.RegisterResponse;
-import auction.common.model.network.UpdateItemRequest;
+import auction.common.model.network.*;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -59,6 +47,7 @@ public final class AuctionClient {
     }
 
     public synchronized void sendBidRequest(BidRequest request) throws IOException {
+        System.out.println(out);
         if (out == null) {
             throw new IOException("Chua ket noi den server.");
         }
@@ -110,6 +99,13 @@ public final class AuctionClient {
         out.reset();
     }
 
+    public synchronized void sendChangeStatusRequest(ChangeStatusRequest request) throws IOException {
+        ensureConnected();
+        out.writeObject(request);
+        out.flush();
+        out.reset();
+    }
+
     public synchronized void close() {
         try {
             if (socket != null) {
@@ -136,6 +132,8 @@ public final class AuctionClient {
                         notifyCreateAuctionObservers(response);
                     } else if (incoming instanceof GetAuctionListResponse response) {
                         notifyAuctionListObservers(response);
+                    } else if (incoming instanceof UpdateItemResponse response) {
+                        notifyUpdateItemObservers(response);
                     }
                 }
             } catch (Exception e) {
@@ -179,6 +177,12 @@ public final class AuctionClient {
     private void notifyRegisterObservers(RegisterResponse response) {
         for (Observer observer : observers) {
             observer.onRegisterResponse(response);
+        }
+    }
+
+    private void notifyUpdateItemObservers(UpdateItemResponse response) {
+        for (Observer observer : observers) {
+            observer.onUpdateItemResponse(response);
         }
     }
 

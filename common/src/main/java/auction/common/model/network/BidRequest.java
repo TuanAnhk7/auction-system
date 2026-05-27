@@ -3,18 +3,18 @@ package auction.common.model.network;
 import java.io.Serializable;
 
 public class BidRequest implements Serializable {
-    private final String itemId;
+    private final String auctionId;
     private final String username;
     private final double bidAmount;
 
-    public BidRequest(String itemId, String username, double bidAmount) {
-        this.itemId = itemId;
+    public BidRequest(String auctionId, String username, double bidAmount) {
+        this.auctionId = auctionId;
         this.username = username;
         this.bidAmount = bidAmount;
     }
 
-    public String getItemId() {
-        return itemId;
+    public String getAuctionId() {
+        return auctionId;
     }
 
     public String getUsername() {

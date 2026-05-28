@@ -4,12 +4,7 @@ import auction.client.ClientSession;
 import auction.client.network.AuctionClient;
 import auction.client.network.Observer;
 import auction.common.exception.InvalidBidException;
-import auction.common.model.network.AdminAuctionActionResponse;
-import auction.common.model.network.AuctionView;
-import auction.common.model.network.BidRequest;
-import auction.common.model.network.BidResponse;
-import auction.common.model.network.CreateAuctionResponse;
-import auction.common.model.network.GetAuctionListResponse;
+import auction.common.model.network.*;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -26,31 +21,25 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 public class LiveAuctionController implements Observer {
-    @FXML
-    private Label lblItemName;
-    @FXML
-    private Label lblCurrentPrice;
-    @FXML
-    private Label lblCurrentWinner;
-    @FXML
-    private Label lblCountdown;
-    @FXML
-    private Label lblStatusMessage;
-    @FXML
-    private TextField txtBidAmount;
-    @FXML
-    private Button btnPlaceBid;
-    @FXML
-    private Button btnQuick50;
-    @FXML
-    private Button btnQuick100;
-    @FXML
-    private Button btnQuick500;
-    @FXML
-    private ListView<String> liveBidStream;
+    @FXML private Label lblBalance;
+    @FXML private Label lblItemName;
+    @FXML private Label lblCurrentPrice;
+    @FXML private Label lblCurrentWinner;
+    @FXML private Label lblCountdown;
+    @FXML private Label lblStatusMessage;
+    @FXML private TextField txtBidAmount;
+    @FXML private Button btnPlaceBid;
+    @FXML private Button btnQuick50;
+    @FXML private Button btnQuick100;
+    @FXML private Button btnQuick500;
+    @FXML private TextField txtMaxBid;
+    @FXML private TextField txtIncrement;
+    @FXML private Button btnRegisterAutoBid;
+    @FXML private ListView<String> liveBidStream;
 
     private AuctionView auctionView;
     private Timeline countdownTimeline;
@@ -62,6 +51,7 @@ public class LiveAuctionController implements Observer {
     public void initialize() {
         AuctionClient.getInstance().addObserver(this);
         configureLiveBidStream();
+        updateBalanceDisplay();
     }
 
     public void setAuctionView(AuctionView auctionView) {
@@ -69,347 +59,262 @@ public class LiveAuctionController implements Observer {
         this.previousStatus = auctionView.getStatus();
         this.finalResultAddedToStream = false;
         refreshView();
+        updateBalanceDisplay();
         startCountdown();
     }
 
-    @FXML
-    private void handlePlaceBid() {
-        if (auctionView == null) {
-            return;
+        public void cleanup() {
+        if (countdownTimeline != null) {
+            countdownTimeline.stop();
         }
-        try {
-            double bidAmount = parseBidAmount(txtBidAmount.getText());
-            validateBid(bidAmount);
-            AuctionClient.getInstance().sendBidRequest(new BidRequest(
-                    auctionView.getItemId(),
-                    ClientSession.getUsername(),
-                    bidAmount
-            ));
-        } catch (NumberFormatException e) {
-            showError("Giá đặt phải là một số hợp lệ.");
-        } catch (InvalidBidException e) {
-            showError(e.getMessage());
-        } catch (IOException e) {
-            showError("Không gửi được yêu cầu đặt giá đến server.");
-        }
-    }
-
-    @FXML
-    private void handleQuickBid50() {
-        applyQuickBid(50.0);
-    }
-
-    @FXML
-    private void handleQuickBid100() {
-        applyQuickBid(100.0);
-    }
-
-    @FXML
-    private void handleQuickBid500() {
-        applyQuickBid(500.0);
+        AuctionClient.getInstance().removeObserver(this);
     }
 
     @FXML
     private void handleClose() {
         cleanup();
-        Stage stage = (Stage) lblItemName.getScene().getWindow();
-        stage.close();
+        if (lblItemName != null && lblItemName.getScene() != null) {
+            Stage stage = (Stage) lblItemName.getScene().getWindow();
+            stage.close();
+        }
     }
 
-    public void cleanup() {
-        stopCountdown();
-        AuctionClient.getInstance().removeObserver(this);
+    @FXML
+    private void handlePlaceBid() {
+        if (auctionView == null) return;
+        try {
+            double bidAmount = parseDouble(txtBidAmount.getText());
+            validateBid(bidAmount);
+
+            // Gọi static trực tiếp từ ClientSession chuẩn 100%
+            BidRequest request = new BidRequest(
+                    String.valueOf(auctionView.getAuctionId()),
+                    ClientSession.getUsername(),
+                    bidAmount
+            );
+
+            AuctionClient.getInstance().sendBidRequest(request);
+            txtBidAmount.clear();
+        } catch (NumberFormatException e) {
+            showError("Vui lòng nhập số tiền hợp lệ!");
+        } catch (InvalidBidException e) {
+            showError(e.getMessage());
+        } catch (IOException e) {
+            showError("Lỗi kết nối mạng khi gửi lượt đặt giá: " + e.getMessage());
+        }
     }
 
-    private void configureLiveBidStream() {
-        // Tô màu riêng cho các dòng kết quả cuối phiên để người dùng nhìn thấy ngay trạng thái chốt.
-        liveBidStream.setCellFactory(listView -> new ListCell<>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty || item == null) {
-                    setText(null);
-                    setStyle("");
-                    return;
-                }
+    @FXML
+    private void handleRegisterAutoBid() {
+        if (auctionView == null) return;
+        try {
+            double maxBid = parseDouble(txtMaxBid.getText());
+            double increment = parseDouble(txtIncrement.getText());
 
-                setText(item);
-                if (item.contains("Ket qua cuoi phien")) {
-                    setStyle("-fx-background-color: #dcfce7; -fx-text-fill: #166534; -fx-font-weight: bold;");
-                } else if (item.contains("Phien dau gia da bi huy")) {
-                    setStyle("-fx-background-color: #fee2e2; -fx-text-fill: #991b1b; -fx-font-weight: bold;");
-                } else {
-                    setStyle("");
-                }
+            if (maxBid <= auctionView.getCurrentPrice()) {
+                throw new InvalidBidException("Giá tối đa (Max Bid) phải lớn hơn giá hiện tại!");
             }
-        });
+            if (increment <= 0) {
+                throw new InvalidBidException("Bước giá (Increment) phải lớn hơn 0!");
+            }
+
+            // Đóng gói thông tin thầu tự động gọi Static từ ClientSession
+            AutoBidRequest request = new AutoBidRequest(
+                    String.valueOf(auctionView.getAuctionId()),
+                    ClientSession.getUsername(),
+                    maxBid,
+                    increment
+            );
+
+            AuctionClient.getInstance().sendAutoBidRequest(request);
+            showInfo("Thành công", "Đã gửi yêu cầu cài đặt đấu giá tự động lên hệ thống!");
+        } catch (NumberFormatException e) {
+            showError("Vui lòng nhập định dạng số cho Max Bid và Increment!");
+        } catch (InvalidBidException e) {
+            showError(e.getMessage());
+        } catch (IOException e) {
+            showError("Lỗi kết nối mạng khi cài đặt Auto-Bid: " + e.getMessage());
+        }
+    }
+
+    @FXML private void handleQuickBid50() {  bidQuickly(50);  }
+    @FXML private void handleQuickBid100() { bidQuickly(100); }
+    @FXML private void handleQuickBid500() { bidQuickly(500); }
+
+    private void bidQuickly(double extraAmount) {
+        if (auctionView == null) return;
+        try {
+            double currentPrice = auctionView.getCurrentPrice();
+            double newBid = currentPrice + extraAmount;
+            validateBid(newBid);
+            
+            BidRequest request = new BidRequest(
+                    String.valueOf(auctionView.getAuctionId()),
+                    ClientSession.getUsername(),
+                    newBid
+            );
+            AuctionClient.getInstance().sendBidRequest(request);
+        } catch (InvalidBidException e) {
+            showError(e.getMessage());
+        } catch (IOException e) {
+            showError("Lỗi kết nối mạng: " + e.getMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Lỗi không xác định: " + e.getMessage());
+        }
     }
 
     @Override
     public void onBidResponse(BidResponse response) {
+        if (response == null) return;
         Platform.runLater(() -> {
-            if (auctionView == null) {
-                return;
+            if (response.isSuccess() && response.getUpdatedAuction() != null) {
+                this.auctionView = response.getUpdatedAuction();
             }
-            if (!response.isSuccess()) {
-                showError(response.getMessage());
-                return;
+            if (response.getBidderUsername().equals(ClientSession.getUsername())) {
+                ClientSession.setBalance(response.getBalance());
+                updateBalanceDisplay();
             }
-            AuctionView updatedAuction = response.getUpdatedAuction();
-            if (updatedAuction == null || !auctionView.getItemId().equals(updatedAuction.getItemId())) {
-                return;
-            }
-            // Bắt chuyển trạng thái để hiện popup đúng ngữ cảnh.
-            handleStatusTransition(auctionView, updatedAuction, false);
-            auctionView = updatedAuction;
             refreshView();
-
-            String bidder = response.getBidderUsername() == null ? "Ẩn danh" : response.getBidderUsername();
-            String line = String.format("[%s] %s vừa đặt %.2f USD",
-                    LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss")),
-                    bidder,
-                    updatedAuction.getCurrentPrice());
-            liveBidStream.getItems().add(0, line);
-            txtBidAmount.clear();
+            checkStatusTransition();
+            checkStatusTransition();
+            if (response.getMessage() != null && !response.getMessage().isEmpty()) {
+                String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+                liveBidStream.getItems().add(0, "[" + time + "] " + response.getMessage());
+            }
         });
     }
 
     @Override
     public void onAuctionListResponse(GetAuctionListResponse response) {
-        Platform.runLater(() -> response.getAuctions().stream()
-                .filter(auction -> auctionView != null && auctionView.getItemId().equals(auction.getItemId()))
-                .findFirst()
-                .ifPresent(updatedAuction -> {
-                    handleStatusTransition(auctionView, updatedAuction, wasForcedFinishByAdmin(auctionView, updatedAuction));
-                    auctionView = updatedAuction;
-                    refreshView();
-                }));
+        if (response == null || auctionView == null) return;
+        Platform.runLater(() -> {
+            response.getAuctions().stream()
+                    .filter(a -> a.getAuctionId().equals(auctionView.getAuctionId()))
+                    .findFirst()
+                    .ifPresent(updated -> {
+                        this.auctionView = updated;
+                        refreshView();
+                        checkStatusTransition();
+                    });
+        });
     }
 
-    @Override
-    public void onCreateAuctionResponse(CreateAuctionResponse response) {
-    }
-
-    @Override
-    public void onAdminAuctionActionResponse(AdminAuctionActionResponse response) {
-        if (response.isSuccess() && response.getUpdatedAuction() != null && auctionView != null
-                && auctionView.getItemId().equals(response.getUpdatedAuction().getItemId())) {
-            Platform.runLater(() -> {
-                handleStatusTransition(auctionView, response.getUpdatedAuction(), true);
-                auctionView = response.getUpdatedAuction();
-                refreshView();
-            });
+    private void updateBalanceDisplay() {
+        if (lblBalance != null) {
+            lblBalance.setText(String.format(Locale.US, "Số dư của bạn: %.2f USD", ClientSession.getBalance()));
         }
     }
 
     private void refreshView() {
+        if (auctionView == null) return;
         lblItemName.setText(auctionView.getItemName());
-        lblCurrentPrice.setText(String.format("%.2f USD", auctionView.getCurrentPrice()));
+        lblCurrentPrice.setText(String.format(Locale.US, "%.2f USD", auctionView.getCurrentPrice()));
         lblCurrentWinner.setText(auctionView.getLeadingBidderDisplay());
-        liveBidStream.getItems().setAll(auctionView.getBidHistoryDisplay());
-        updateCountdown();
-        updateInteractiveState();
-    }
-
-    private void updateInteractiveState() {
-        boolean running = "RUNNING".equalsIgnoreCase(auctionView.getStatus());
-        boolean expired = auctionView.getEndTime() == null || !LocalDateTime.now().isBefore(auctionView.getEndTime());
-        boolean disabled = !running || expired;
-
-        btnPlaceBid.setDisable(disabled);
-        btnQuick50.setDisable(disabled);
-        btnQuick100.setDisable(disabled);
-        btnQuick500.setDisable(disabled);
-        txtBidAmount.setDisable(disabled);
-
-        if (disabled) {
-            lblStatusMessage.setText("Phiên đã đóng");
-        } else {
-            lblStatusMessage.setText("Phiên đang mở để đặt giá");
+        lblStatusMessage.setText("Trạng thái: " + auctionView.getStatusDisplay());
+        if (txtBidAmount != null && txtBidAmount.getText().isEmpty()) {
+            txtBidAmount.setText(String.format(Locale.US, "%.2f", auctionView.getCurrentPrice() + 1.0));
         }
     }
 
-    private void startCountdown() {
-        stopCountdown();
-        countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
-            updateCountdown();
-            updateInteractiveState();
-            if (auctionView != null && !LocalDateTime.now().isBefore(auctionView.getEndTime()) && !endPopupShown) {
+    private void checkStatusTransition() {
+        String currentStatus = auctionView.getStatus();
+        if ("FINISHED".equalsIgnoreCase(currentStatus) && !"FINISHED".equalsIgnoreCase(previousStatus)) {
+            appendFinalResultToStream(auctionView);
+            if (!endPopupShown) {
                 endPopupShown = true;
-                appendFinalResultToStream(auctionView);
-                showInfo(
-                        "Phiên kết thúc",
-                        buildFinishedAuctionMessage(
-                                "Phiên đấu giá đã kết thúc do hết thời gian.",
-                                auctionView
-                        )
-                );
+                showInfo("Kết thúc", buildFinishedAuctionMessage("Phiên đấu giá đã khép lại!", auctionView));
+            }
+        } else if ("CANCELLED".equalsIgnoreCase(currentStatus) && !"CANCELLED".equalsIgnoreCase(previousStatus)) {
+            appendCancellationToStream();
+            showError("Phiên đấu giá này đã bị hủy bỏ bởi quản trị viên.");
+        }
+        this.previousStatus = currentStatus;
+    }
+
+    private void startCountdown() {
+        if (countdownTimeline != null) countdownTimeline.stop();
+        countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
+            if (auctionView == null || !"RUNNING".equalsIgnoreCase(auctionView.getStatus())) {
+                lblCountdown.setText("00:00:00");
+                return;
+            }
+            long secondsLeft = ChronoUnit.SECONDS.between(LocalDateTime.now(), auctionView.getEndTime());
+            if (secondsLeft <= 0) {
+                lblCountdown.setText("Thời gian đã hết!");
+                countdownTimeline.stop();
+            } else {
+                long hours = secondsLeft / 3600;
+                long minutes = (secondsLeft % 3600) / 60;
+                long secs = secondsLeft % 60;
+                lblCountdown.setText(String.format("%02d:%02d:%02d", hours, minutes, secs));
             }
         }));
         countdownTimeline.setCycleCount(Timeline.INDEFINITE);
         countdownTimeline.play();
     }
 
-    private void stopCountdown() {
-        if (countdownTimeline != null) {
-            countdownTimeline.stop();
-            countdownTimeline = null;
-        }
-    }
-
-    private void updateCountdown() {
-        if (auctionView == null || auctionView.getEndTime() == null) {
-            lblCountdown.setText("--:--");
-            return;
-        }
-        long remainingSeconds = ChronoUnit.SECONDS.between(LocalDateTime.now(), auctionView.getEndTime());
-        if (remainingSeconds <= 0 || !"RUNNING".equalsIgnoreCase(auctionView.getStatus())) {
-            lblCountdown.setText("00:00");
-            return;
-        }
-
-        long minutes = remainingSeconds / 60;
-        long seconds = remainingSeconds % 60;
-        lblCountdown.setText(String.format("%02d:%02d", minutes, seconds));
-    }
-
-    private void applyQuickBid(double increment) {
-        if (auctionView == null) {
-            return;
-        }
-        // Nếu người dùng đã bấm nhiều nút nhanh liên tiếp thì cộng dồn trên giá đang nhập.
-        // Nếu ô đang trống hoặc không hợp lệ thì quay về lấy từ giá hiện tại của phiên.
-        double baseAmount = auctionView.getCurrentPrice();
-        String currentText = txtBidAmount.getText() == null ? "" : txtBidAmount.getText().trim();
-        if (!currentText.isEmpty()) {
-            try {
-                baseAmount = parseBidAmount(currentText);
-            } catch (NumberFormatException ignored) {
-                baseAmount = auctionView.getCurrentPrice();
+    private void configureLiveBidStream() {
+        liveBidStream.setCellFactory(lv -> new ListCell<String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText(null);
+                } else {
+                    setText(item);
+                }
             }
-        }
-
-        double nextBid = baseAmount + increment;
-        txtBidAmount.setText(String.format(Locale.US, "%.2f", nextBid));
+        });
     }
 
-    // Phân biệt rõ kết thúc do admin hay do hết giờ để popup dễ hiểu hơn.
-    private void handleStatusTransition(AuctionView oldAuction, AuctionView newAuction, boolean fromAdminAction) {
-        if (oldAuction == null || newAuction == null) {
-            return;
-        }
-
-        String oldStatus = oldAuction.getStatus();
-        String newStatus = newAuction.getStatus();
-        if (oldStatus.equalsIgnoreCase(newStatus) || newStatus.equalsIgnoreCase(previousStatus)) {
-            return;
-        }
-
-        previousStatus = newStatus;
-        if ("CANCELED".equalsIgnoreCase(newStatus)) {
-            endPopupShown = true;
-            appendCancellationToStream();
-            showInfo("Phiên bị hủy", "Phiên đấu giá đã bị quản trị viên hủy. Mọi thao tác đặt giá đã bị khóa.");
-        } else if ("FINISHED".equalsIgnoreCase(newStatus) && fromAdminAction) {
-            endPopupShown = true;
-            appendFinalResultToStream(newAuction);
-            showInfo(
-                    "Phiên kết thúc sớm",
-                    buildFinishedAuctionMessage(
-                            "Phiên đấu giá đã được quản trị viên kết thúc.",
-                            newAuction
-                    )
-            );
-        } else if ("RUNNING".equalsIgnoreCase(newStatus) && "OPEN".equalsIgnoreCase(oldStatus)) {
-            showInfo("Phiên bắt đầu", "Phiên đấu giá đã được mở. Bạn có thể bắt đầu đặt giá.");
+    private void validateBid(double amount) throws InvalidBidException {
+        if (!"RUNNING".equalsIgnoreCase(auctionView.getStatus())) throw new InvalidBidException("Phiên không còn mở.");
+        if (amount <= auctionView.getCurrentPrice()) {
+            throw new InvalidBidException(String.format("Giá đặt (%.2f) phải cao hơn giá hiện tại (%.2f)", amount, auctionView.getCurrentPrice()));
         }
     }
 
-    // Nếu phiên chuyển RUNNING -> FINISHED trước thời điểm endTime cũ thì gần như chắc là admin đã kết thúc sớm.
-    private boolean wasForcedFinishByAdmin(AuctionView oldAuction, AuctionView newAuction) {
-        if (oldAuction == null || newAuction == null || oldAuction.getEndTime() == null) {
-            return false;
-        }
-
-        return "RUNNING".equalsIgnoreCase(oldAuction.getStatus())
-                && "FINISHED".equalsIgnoreCase(newAuction.getStatus())
-                && LocalDateTime.now().isBefore(oldAuction.getEndTime());
+    private void showError(String msg) {
+        Platform.runLater(() -> {
+            Alert a = new Alert(Alert.AlertType.ERROR);
+            a.setTitle("Lỗi");
+            a.setHeaderText(null);
+            a.setContentText(msg);
+            a.showAndWait();
+        });
     }
 
-    private void validateBid(double bidAmount) throws InvalidBidException {
-        if (!"RUNNING".equalsIgnoreCase(auctionView.getStatus())) {
-            throw new InvalidBidException("Phiên đấu giá không còn mở để đặt giá.");
-        }
-        if (bidAmount <= auctionView.getCurrentPrice()) {
-            throw new InvalidBidException(String.format(
-                    "Giá đặt (%.2f) phải cao hơn giá hiện tại (%.2f) USD",
-                    bidAmount,
-                    auctionView.getCurrentPrice()
-            ));
-        }
+    private void showInfo(String title, String msg) {
+        Platform.runLater(() -> {
+            Alert a = new Alert(Alert.AlertType.INFORMATION);
+            a.setTitle(title);
+            a.setHeaderText(null);
+            a.setContentText(msg);
+            a.showAndWait();
+        });
     }
 
-    private void showError(String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Lỗi đấu giá");
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    private double parseDouble(String val) {
+        return Double.parseDouble(val.trim().replace(',', '.'));
     }
 
-    private void showInfo(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+    private String buildFinishedAuctionMessage(String pref, AuctionView a) {
+        String w = a.getLeadingBidderDisplay();
+        return pref + ("Chưa có".equalsIgnoreCase(w) ? "\nChưa có người thắng." : "\nNgười thắng: " + w + "\nGiá chốt: " + String.format("%.2f USD", a.getCurrentPrice()));
     }
 
-    // Chấp nhận cả 1234.50 và 1234,50 để tránh lỗi theo locale của máy.
-    private double parseBidAmount(String rawValue) {
-        return Double.parseDouble(rawValue.trim().replace(',', '.'));
-    }
-
-    // Khi phiên kết thúc, popup cần công bố thẳng người thắng và giá chốt.
-    private String buildFinishedAuctionMessage(String prefix, AuctionView auction) {
-        String winner = auction.getLeadingBidderDisplay();
-        String finalPrice = String.format("%.2f USD", auction.getCurrentPrice());
-
-        if ("Chưa có".equalsIgnoreCase(winner)) {
-            return prefix + "\nChưa có người thắng vì chưa có lượt đặt giá hợp lệ.";
-        }
-
-        return prefix
-                + "\nNgười thắng cuộc: " + winner
-                + "\nGiá chốt: " + finalPrice;
-    }
-
-    // Ghi kết quả cuối phiên vào live stream để người dùng xem lại lịch sử ngay trên màn hình.
-    private void appendFinalResultToStream(AuctionView auction) {
-        if (finalResultAddedToStream) {
-            return;
-        }
+    private void appendFinalResultToStream(AuctionView a) {
+        if (finalResultAddedToStream) return;
         finalResultAddedToStream = true;
-
-        String winner = auction.getLeadingBidderDisplay();
-        String finalPrice = String.format("%.2f USD", auction.getCurrentPrice());
-        String time = LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
-
-        if ("Chưa có".equalsIgnoreCase(winner)) {
-            liveBidStream.getItems().add(0, "[" + time + "] Ket qua cuoi phien: chua co nguoi thang.");
-            return;
-        }
-
-        liveBidStream.getItems().add(0,
-                String.format("[%s] Ket qua cuoi phien: %s thang voi gia %s", time, winner, finalPrice));
+        String w = a.getLeadingBidderDisplay();
+        String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+        liveBidStream.getItems().add(0, String.format("[%s] Kết quả cuối phiên: %s", time, "Chưa có".equalsIgnoreCase(w) ? "chưa có người thắng." : w + " thắng với giá " + String.format("%.2f USD", a.getCurrentPrice())));
     }
 
     private void appendCancellationToStream() {
-        if (finalResultAddedToStream) {
-            return;
-        }
+        if (finalResultAddedToStream) return;
         finalResultAddedToStream = true;
-        String time = LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("HH:mm:ss"));
-        liveBidStream.getItems().add(0, "[" + time + "] Phien dau gia da bi huy boi quan tri vien.");
+        liveBidStream.getItems().add(0, "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + "] Phiên đấu giá đã bị hủy bởi quản trị viên.");
     }
 }

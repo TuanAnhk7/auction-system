@@ -7,6 +7,7 @@ import auction.common.model.network.GetAuctionListResponse;
 import auction.common.model.network.LoginResponse;
 import auction.common.model.network.RegisterResponse;
 import auction.common.model.network.UpdateItemResponse;
+import auction.common.model.network.AutoBidResponse;
 
 public interface Observer {
     void onBidResponse(BidResponse response);
@@ -26,5 +27,8 @@ public interface Observer {
     }
 
     default void onUpdateItemResponse(UpdateItemResponse response) {
+    }
+
+    default void onAutoBidResponse(AutoBidResponse response) {
     }
 }

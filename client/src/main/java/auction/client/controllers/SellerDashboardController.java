@@ -103,6 +103,7 @@ public class SellerDashboardController implements Observer {
             double startingPrice = Double.parseDouble(startingPriceField.getText().trim());
             long durationMinutes = Long.parseLong(durationMinutesField.getText().trim());
 
+            // FIX: Gọi phương thức static ClientSession.getUsername() chuẩn xác thay vì tạo thực thể biến cục bộ bị lỗi
             AuctionClient.getInstance().sendCreateAuctionRequest(new CreateAuctionRequest(
                     ClientSession.getUsername(),
                     itemName,
@@ -259,6 +260,7 @@ public class SellerDashboardController implements Observer {
     public void onAuctionListResponse(GetAuctionListResponse response) {
         Platform.runLater(() -> {
             myAuctionSource.setAll(response.getAuctions());
+            // FIX: Gọi static ClientSession.getUsername() chuẩn xác để lọc danh sách đấu giá thuộc về riêng Seller này
             myAuctions.setPredicate(auction -> ClientSession.getUsername().equalsIgnoreCase(auction.getSellerUsername()));
             myAuctionsTable.refresh();
         });
@@ -282,6 +284,7 @@ public class SellerDashboardController implements Observer {
         Platform.runLater(() -> {
             if (response.isSuccess()) {
                 showAlert(Alert.AlertType.INFORMATION, "Thành công", response.getMessage());
+                handleRefreshMyAuctions(); // Làm mới lại bảng sau khi cập nhật thông tin thành công
             } else {
                 showAlert(Alert.AlertType.ERROR, "Cập nhật thất bại", response.getMessage());
             }

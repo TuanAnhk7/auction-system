@@ -30,14 +30,14 @@ public class AuctionService {
         this.notificationService = notificationService;
     }
 
-    private static final int MAX_RETRIES = 3; // số lần thử lại max
-    private static final long RETRY_DELAY_MS = 100; // Độ trễ giữa các lần thử lại
+    private static final int MAX_RETRIES = 3;
+    private static final long RETRY_DELAY_MS = 100;
 
     public Optional<Auction> createAuction(Item item, LocalDateTime startTime, LocalDateTime endTime, String sellerId) {
-        if (item == null) throw new IllegalArgumentException("Item cannot be null for auction creation.");
-        if (startTime == null) throw new IllegalArgumentException("Start time cannot be null for auction creation.");
-        if (endTime == null) throw new IllegalArgumentException("End time cannot be null for auction creation.");
-        if (sellerId == null || sellerId.trim().isEmpty()) throw new IllegalArgumentException("Seller ID cannot be null or empty for auction creation.");
+        if (item == null) throw new IllegalArgumentException("Item cannot be null.");
+        if (startTime == null) throw new IllegalArgumentException("Start time cannot be null.");
+        if (endTime == null) throw new IllegalArgumentException("End time cannot be null.");
+        if (sellerId == null || sellerId.trim().isEmpty()) throw new IllegalArgumentException("Seller ID cannot be null or empty.");
         if (endTime.isBefore(startTime)) throw new IllegalArgumentException("End time must be after start time.");
         if (endTime.isBefore(LocalDateTime.now())) throw new IllegalArgumentException("End time must be in the future.");
 
@@ -54,7 +54,6 @@ public class AuctionService {
                 return Optional.of(auctionRepository.save(auction));
             } catch (DataAccessException e) {
                 if (i < MAX_RETRIES - 1) {
-                    System.err.println("Data access error during auction creation, retrying... (" + (i + 1) + "/" + MAX_RETRIES + ")");
                     try { Thread.sleep(RETRY_DELAY_MS); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); throw new IllegalArgumentException("Auction creation interrupted.", ie); }
                 } else {
                     throw new IllegalArgumentException("Failed to create auction after " + MAX_RETRIES + " retries.", e);
@@ -75,7 +74,7 @@ public class AuctionService {
         auction.updateStatusIfExpired();
 
         if (!auction.canAcceptBids()) {
-            throw new AuctionClosedException("Auction is not accepting bids. Current status: " + auction.getStatus());
+            throw new AuctionClosedException("Auction is not accepting bids.");
         }
 
         Optional<Bidder> bidderOptional = retryDataAccessException(() -> userRepository.findById(bidderId), "fetching bidder for bid")
@@ -87,9 +86,9 @@ public class AuctionService {
         }
 
         Bidder bidder = bidderOptional.get();
-        BidTransaction transaction = auction.placeBid(bidder, bidAmount);
+        List<BidTransaction> transactions = auction.placeBid(bidder, bidAmount);
         retryDataAccessException(() -> auctionRepository.save(auction), "saving auction after bid");
-        return Optional.of(transaction);
+        return transactions.isEmpty() ? Optional.empty() : Optional.of(transactions.get(0));
     }
 
     public Optional<Auction> getAuctionDetails(String auctionId) {
@@ -137,7 +136,6 @@ public class AuctionService {
                 if (actualWinner.getAccountBalance() >= finalBidAmount) {
                     actualWinner.setAccountBalance(actualWinner.getAccountBalance() - finalBidAmount);
                     userRepository.save(actualWinner);
-                } else {
                 }
             }
 
@@ -147,8 +145,6 @@ public class AuctionService {
                 actualSeller.setRating(actualSeller.getRating() + 0.1);
                 userRepository.save(actualSeller);
             }
-        } else {
-            System.out.println("Auction " + auctionId + " finished with no bids.");
         }
 
         notificationService.notifyAuctionWinner(auction, winner);
@@ -183,7 +179,6 @@ public class AuctionService {
                 return supplier.get();
             } catch (DataAccessException e) {
                 if (i < MAX_RETRIES - 1) {
-                    System.err.println("Data access error during " + operationName + ", retrying... (" + (i + 1) + "/" + MAX_RETRIES + ")");
                     try { Thread.sleep(RETRY_DELAY_MS); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); throw new DataAccessException(operationName + " interrupted.", ie); }
                 } else {
                     throw new DataAccessException("Failed to " + operationName + " after " + MAX_RETRIES + " retries.", e);

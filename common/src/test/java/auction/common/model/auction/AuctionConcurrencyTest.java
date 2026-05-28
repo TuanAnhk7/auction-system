@@ -1,10 +1,11 @@
 package auction.common.model.auction;
 
 import auction.common.exception.AuctionClosedException;
-import auction.common.exception.AuctionException;
 import auction.common.exception.InvalidBidException;
 import auction.common.model.item.Art;
 import auction.common.model.user.Bidder;
+import auction.common.model.network.UserAccount;
+import auction.common.model.network.Role; // Import Enum Role của bạn
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -24,6 +25,23 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AuctionConcurrencyTest {
+
+    // 🔥 Lớp Fake thủ công khớp chính xác kiểu trả về UserAccount và Enum Role
+    static class FakeUserManager implements IUserManager {
+        @Override
+        public UserAccount findByUsername(String username) {
+            // Xác định Role phù hợp từ Enum của bạn (Thử thay thế bằng Role.CLIENT hoặc Role.USER nếu Role.BIDDER không tồn tại)
+            Role userRole = Role.BIDDER;
+
+            // Khởi tạo đối tượng UserAccount với cấu trúc: (username, password, role, balance)
+            return new UserAccount(username, "pwd", userRole, 10000.0);
+        }
+
+        @Override
+        public void updateAccountBalance(String username, double balance) {
+            // Để trống vì hàm này không ảnh hưởng trực tiếp đến luồng xử lý bid đồng thời
+        }
+    }
 
     @Test
     void concurrentBidsKeepHighestPriceConsistent() throws Exception {
@@ -76,8 +94,9 @@ class AuctionConcurrencyTest {
 
     @Test
     void auctionManagerRoutesConcurrentBidsToSingleAuctionSafely() throws Exception {
-        IUserManager notificationService = null;
+        IUserManager notificationService = new FakeUserManager();
         AuctionManager manager = AuctionManager.getInstance(notificationService);
+
         Instant startTime = Instant.now();
         Instant endTime = startTime.plus(10, ChronoUnit.MINUTES);
 

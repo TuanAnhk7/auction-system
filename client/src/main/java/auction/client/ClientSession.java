@@ -5,6 +5,7 @@ import auction.common.model.network.Role;
 public final class ClientSession {
     private static volatile String username = "guest";
     private static volatile Role role = Role.BIDDER;
+    private static volatile double balance = 0.0;
 
     private ClientSession() {
     }
@@ -23,5 +24,13 @@ public final class ClientSession {
 
     public static void setRole(Role role) {
         ClientSession.role = role;
+    }
+
+    public static double getBalance() {
+        return balance;
+    }
+
+    public static void setBalance(double balance) {
+        ClientSession.balance = balance;
     }
 }

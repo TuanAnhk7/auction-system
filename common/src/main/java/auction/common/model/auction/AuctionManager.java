@@ -111,7 +111,7 @@ public class AuctionManager {
                 .findFirst();
     }
 
-    public BidTransaction placeBid(String auctionId, String bidderUsername, double bidAmount)
+    public synchronized List<BidTransaction> placeBid(String auctionId, String bidderUsername, double bidAmount)
             throws AuctionClosedException, InvalidBidException {
         Auction auction = activeAuctions.get(auctionId);
         if (auction == null) {
@@ -123,12 +123,12 @@ public class AuctionManager {
             throw new InvalidBidException("Bidder account not found.");
         }
 
-        Bidder previousHighestBidder = auction.getHighestBidder();
-        double previousHighestBidAmount = auction.getCurrentHighestBid();
+        Bidder initialHighestBidder = auction.getHighestBidder();
+        double initialHighestBidAmount = auction.getCurrentHighestBid();
 
         double availableBalance = bidderAccount.getAccountBalance();
-        if (previousHighestBidder != null && previousHighestBidder.getUsername() != null && previousHighestBidder.getUsername().equals(bidderUsername)) {
-            availableBalance += previousHighestBidAmount;
+        if (initialHighestBidder != null && bidderUsername.equals(initialHighestBidder.getUsername())) {
+            availableBalance += initialHighestBidAmount;
         }
 
         if (availableBalance < bidAmount) {
@@ -136,20 +136,33 @@ public class AuctionManager {
         }
 
         Bidder currentBidder = new Bidder(bidderAccount.getUsername(), bidderAccount.getPassword(), bidderAccount.getUsername(), availableBalance);
-
-        BidTransaction transaction = auction.placeBid(currentBidder, bidAmount);
-
-        if (transaction != null) {
-            userManager.updateAccountBalance(bidderUsername, -bidAmount);
-
-            if (previousHighestBidder != null && previousHighestBidder.getUsername() != null) {
-                userManager.updateAccountBalance(previousHighestBidder.getUsername(), previousHighestBidAmount);
-            }
-        }
-        return transaction;
+        
+        List<BidTransaction> transactions = auction.placeBid(currentBidder, bidAmount);
+        handleBalanceUpdates(auction, initialHighestBidder, initialHighestBidAmount, transactions);
+        return transactions;
     }
 
-    public BidTransaction placeBidByItemId(String itemId, String bidderUsername, double bidAmount)
+    private void handleBalanceUpdates(Auction auction, Bidder initialBidder, double initialAmount, List<BidTransaction> transactions) {
+        Bidder lastBidder = initialBidder;
+        double lastAmount = initialAmount;
+
+        for (BidTransaction tx : transactions) {
+            // Refund the previous highest bidder
+            if (lastBidder != null && lastBidder.getUsername() != null) {
+                userManager.updateAccountBalance(lastBidder.getUsername(), lastAmount);
+            }
+            // Deduct from the new highest bidder
+            userManager.updateAccountBalance(tx.getBidderUsername(), -tx.getAmount());
+
+            // Update for next iteration
+            // We need a Bidder object for lastBidder. tx only has username/id.
+            // But we only need username and amount for refunding.
+            lastBidder = new Bidder(tx.getBidderUsername(), "", tx.getBidderUsername(), 0.0);
+            lastAmount = tx.getAmount();
+        }
+    }
+
+    public List<BidTransaction> placeBidByItemId(String itemId, String bidderUsername, double bidAmount)
             throws AuctionClosedException, InvalidBidException {
         Auction auction = activeAuctions.values().stream()
                 .filter(a -> a.getItem().getId().equals(itemId))
@@ -157,6 +170,22 @@ public class AuctionManager {
                 .orElseThrow(() -> new InvalidBidException("Item not found in any active auction."));
         
         return placeBid(auction.getId(), bidderUsername, bidAmount);
+    }
+
+    public synchronized void registerAutoBid(String itemId, String bidderUsername, double maxBid, double increment)
+            throws AuctionClosedException, InvalidBidException {
+        Auction auction = findByItemId(itemId)
+                .orElseThrow(() -> new InvalidBidException("Item not found."));
+        
+        UserAccount bidderAccount = userManager.findByUsername(bidderUsername);
+        if (bidderAccount == null) throw new InvalidBidException("Account not found.");
+        
+        Bidder initialHighestBidder = auction.getHighestBidder();
+        double initialHighestBidAmount = auction.getCurrentHighestBid();
+
+        Bidder bidder = new Bidder(bidderAccount.getUsername(), bidderAccount.getPassword(), bidderAccount.getUsername(), bidderAccount.getAccountBalance());
+        List<BidTransaction> transactions = auction.registerAutoBid(bidder, maxBid, increment);
+        handleBalanceUpdates(auction, initialHighestBidder, initialHighestBidAmount, transactions);
     }
 
     public void removeAuction(String auctionId) {
@@ -168,7 +197,6 @@ public class AuctionManager {
 
     public List<Auction> closeExpiredAuctions() {
         List<Auction> changedAuctions = new ArrayList<>();
-        // Vòng lặp kiểm tra và cập nhật trạng thái khi hết giờ
         for (Auction auction : activeAuctions.values()) {
             if (auction.updateStatusIfExpired()) {
                 changedAuctions.add(auction);
@@ -206,43 +234,6 @@ public class AuctionManager {
         if (auction.getBidHistory().isEmpty()) {
             item.setCurrentPrice(newPrice);
             auction.setCurrentHighestBid(newPrice);
-        }
-
-        return auction;
-    }
-
-    public Auction updateItem(
-            String auctionId,
-            String name,
-            String description,
-            double startingPrice,
-            String itemType,
-            String specificProp1,
-            int specificProp2
-    ) throws AuctionException {
-        Auction auction = activeAuctions.get(auctionId);
-        if (auction == null) {
-            throw new AuctionException("Auction not found or is not active.");
-        }
-
-        Item item = auction.getItem();
-        item.setName(name);
-        item.setDescription(description);
-        item.setStartingPrice(startingPrice);
-
-        if (auction.getBidHistory().isEmpty()) {
-            item.setCurrentPrice(startingPrice);
-            auction.setCurrentHighestBid(startingPrice);
-        }
-
-        if ("art".equalsIgnoreCase(itemType) && item instanceof Art art) {
-            art.setArtist(specificProp1);
-            art.setYearCreated(specificProp2);
-        } else if (("antique".equalsIgnoreCase(itemType) || "antiques".equalsIgnoreCase(itemType)) && item instanceof Antique antique) {
-            antique.setOrigin(specificProp1);
-            antique.setEstimatedAge(specificProp2);
-        } else if (!item.getCategory().equalsIgnoreCase(itemType)) {
-            throw new AuctionException("Item type mismatch or unsupported type for update.");
         }
 
         return auction;

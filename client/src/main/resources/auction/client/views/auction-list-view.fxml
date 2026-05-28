@@ -14,6 +14,8 @@
         <TextField fx:id="searchField" promptText="Tìm theo tên vật phẩm, người tạo, người dẫn đầu..." prefWidth="340.0" />
         <ComboBox fx:id="statusFilterComboBox" prefWidth="150.0" promptText="Lọc trạng thái" />
         <ComboBox fx:id="sortComboBox" prefWidth="190.0" promptText="Sắp xếp" />
+        <Region HBox.hgrow="ALWAYS" />
+        <Label fx:id="balanceLabel" text="Số dư: 0.00 USD" style="-fx-font-weight: bold; -fx-text-fill: #059669; -fx-font-size: 16px;" />
       </HBox>
     </VBox>
   </top>

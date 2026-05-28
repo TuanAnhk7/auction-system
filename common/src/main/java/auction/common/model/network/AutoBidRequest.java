@@ -2,18 +2,19 @@ package auction.common.model.network;
 
 import java.io.Serializable;
 
-public class BidRequest implements Serializable {
+public class AutoBidRequest implements Serializable {
     private static final long serialVersionUID = 1L;
 
     private final String auctionId;
     private final String username;
-    private final double bidAmount;
+    private final double maxBid;
+    private final double increment;
 
-    // Sử dụng duy nhất constructor đầy đủ này để đảm bảo mọi thuộc tính final đều được khởi tạo
-    public BidRequest(String auctionId, String username, double bidAmount) {
+    public AutoBidRequest(String auctionId, String username, double maxBid, double increment) {
         this.auctionId = auctionId;
         this.username = username;
-        this.bidAmount = bidAmount;
+        this.maxBid = maxBid;
+        this.increment = increment;
     }
 
     public String getAuctionId() {
@@ -24,7 +25,11 @@ public class BidRequest implements Serializable {
         return username;
     }
 
-    public double getBidAmount() {
-        return bidAmount;
+    public double getMaxBid() {
+        return maxBid;
+    }
+
+    public double getIncrement() {
+        return increment;
     }
 }

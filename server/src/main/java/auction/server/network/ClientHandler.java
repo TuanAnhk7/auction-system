@@ -48,6 +48,8 @@ public class ClientHandler implements Runnable {
                     handleRegisterRequest(request);
                 } else if (receivedData instanceof BidRequest request) {
                     handleBidRequest(request);
+                } else if (receivedData instanceof AutoBidRequest request) {
+                    handleAutoBidRequest(request);
                 } else if (receivedData instanceof AdminAuctionActionRequest request) {
                     handleAdminAuctionActionRequest(request);
                 } else if (receivedData instanceof CreateAuctionRequest request) {
@@ -55,7 +57,6 @@ public class ClientHandler implements Runnable {
                 } else if (receivedData instanceof UpdateItemRequest request) {
                     handleUpdateItemRequest(request);
                 } else if (receivedData instanceof DeleteAuctionRequest dar) {
-                    // Backwards-compatibility: accept DeleteAuctionRequest from older clients and convert
                     handleDeleteItemRequest(new DeleteItemRequest(dar.getAuctionId()));
                 } else if (receivedData instanceof DeleteItemRequest request) {
                     handleDeleteItemRequest(request);
@@ -79,7 +80,7 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public synchronized void send(BidResponse response) {
+    public synchronized void send(Object response) {
         try {
             if (out != null) {
                 out.writeObject(response);
@@ -87,91 +88,7 @@ public class ClientHandler implements Runnable {
                 out.reset();
             }
         } catch (IOException e) {
-            System.err.println("Khong gui duoc goi tin realtime den client.");
-        }
-    }
-
-    public synchronized void send(CreateAuctionResponse response) {
-        try {
-            if (out != null) {
-                out.writeObject(response);
-                out.flush();
-                out.reset();
-            }
-        } catch (IOException e) {
-            System.err.println("Khong gui duoc ket qua tao phien den client.");
-        }
-    }
-
-    public synchronized void send(AdminAuctionActionResponse response) {
-        try {
-            if (out != null) {
-                out.writeObject(response);
-                out.flush();
-                out.reset();
-            }
-        } catch (IOException e) {
-            System.err.println("Khong gui duoc ket qua quan tri phien den client.");
-        }
-    }
-
-    public synchronized void send(LoginResponse response) {
-        try {
-            if (out != null) {
-                out.writeObject(response);
-                out.flush();
-                out.reset();
-            }
-        } catch (IOException e) {
-            System.err.println("Khong gui duoc ket qua dang nhap den client.");
-        }
-    }
-
-    public synchronized void send(RegisterResponse response) {
-        try {
-            if (out != null) {
-                out.writeObject(response);
-                out.flush();
-                out.reset();
-            }
-        } catch (IOException e) {
-            System.err.println("Khong gui duoc ket qua dang ky den client.");
-        }
-    }
-
-    public synchronized void send(UpdateItemResponse response) {
-        try {
-            if (out != null) {
-                out.writeObject(response);
-                out.flush();
-                out.reset();
-            }
-        } catch (IOException e) {
-            System.err.println("Khong gui duoc ket qua cap nhat san pham den client.");
-        }
-    }
-
-    public synchronized void send(DeleteItemResponse response) {
-        try {
-            if (out != null) {
-                out.writeObject(response);
-                out.flush();
-                out.reset();
-            }
-        } catch (IOException e) {
-            System.err.println("Khong gui duoc ket qua xoa san pham den client.");
-        }
-    }
-
-    public synchronized void send(AuctionEndedResponse response) {
-        try {
-            if (out != null) {
-                out.writeObject(response);
-                out.flush();
-                out.reset();
-            }
-        } catch (IOException e) {
-            System.err.println("Khong gui duoc thong bao ket thuc dau gia.");
+            System.err.println("Khong gui duoc goi tin den client.");
         }
     }
 
@@ -183,7 +100,7 @@ public class ClientHandler implements Runnable {
         }
 
         authenticatedUser = user;
-        send(new LoginResponse(true, "Đăng nhập thành công.", user.getRole()));
+        send(new LoginResponse(true, "Đăng nhập thành công.", user.getRole(), user.getAccountBalance()));
     }
 
     private void handleRegisterRequest(RegisterRequest request) {
@@ -210,27 +127,21 @@ public class ClientHandler implements Runnable {
 
     private void handleBidRequest(BidRequest request) {
         try {
-            // 1. Kiểm tra đăng nhập
             ensureAuthenticated();
             UserAccount user = authenticatedUser;
-
-            // 2. Gọi hàm xử lý - Truyền TRỰC TIẾP chuỗi String (request.getAuctionId())
-            // Không thực hiện ép kiểu sang int nữa để tránh lỗi "incompatible types"
-            auctionManager.placeBidByItemId(request.getAuctionId(), user.getUsername(), request.getBidAmount());
-
-            // 3. Tìm lại phiên bằng chuỗi String ID
-            Auction updatedAuction = auctionManager.findByItemId(request.getAuctionId())
+            auctionManager.placeBid(request.getAuctionId(), user.getUsername(), request.getBidAmount());
+            refreshAuthenticatedUserBalance();
+            Auction updatedAuction = auctionManager.findById(request.getAuctionId())
                     .orElseThrow(() -> new InvalidBidException("Không tìm thấy phiên đấu giá sau khi cập nhật."));
 
-            // 4. Phát sóng cập nhật giá mới cho tất cả các Client đang online
             server.broadcast(new BidResponse(
                     true,
-                    "Đặt giá thành công.",
+                    String.format("%s đã đặt giá %.2f USD", user.getUsername(), request.getBidAmount()),
                     toAuctionView(updatedAuction),
-                    user.getUsername()
+                    user.getUsername(),
+                    authenticatedUser.getAccountBalance()
             ));
         } catch (AuctionException e) {
-            // Trả về thông báo lỗi nghiệp vụ riêng cho Client đặt giá
             send(new BidResponse(false, e.getMessage(), null));
         } catch (Exception e) {
             send(new BidResponse(false, "Lỗi hệ thống khi đặt giá: " + e.getMessage(), null));
@@ -238,12 +149,47 @@ public class ClientHandler implements Runnable {
         }
     }
 
+    private void handleAutoBidRequest(AutoBidRequest request) {
+        try {
+            ensureAuthenticated();
+            UserAccount user = authenticatedUser;
+            auctionManager.registerAutoBid(request.getAuctionId(), user.getUsername(), request.getMaxBid(), request.getIncrement());
+            
+            Auction updatedAuction = auctionManager.findById(request.getAuctionId())
+                    .orElseThrow(() -> new InvalidBidException("Không tìm thấy phiên đấu giá."));
+
+            send(new AutoBidResponse(true, "Đăng ký tự động thầu thành công."));
+            server.broadcast(new BidResponse(
+                    true,
+                    String.format("%s đã đặt giá tự động %.2f USD", user.getUsername(), updatedAuction.getCurrentHighestBid()),
+                    toAuctionView(updatedAuction),
+                    "Hệ thống"
+            ));
+        } catch (AuctionException e) {
+            send(new AutoBidResponse(false, e.getMessage()));
+        } catch (Exception e) {
+            send(new AutoBidResponse(false, "Lỗi hệ thống khi đăng ký tự động thầu: " + e.getMessage()));
+            e.printStackTrace();
+        }
+    }
+
     private void handleAuctionListRequest() {
         try {
             ensureAuthenticated();
-            sendAuctionList(buildAuctionListResponse());
+            send(buildAuctionListResponse());
         } catch (AuctionException e) {
             System.err.println("Khong gui duoc danh sach dau gia hien tai.");
+        }
+    }
+
+    private void refreshAuthenticatedUserBalance() {
+        if (authenticatedUser == null) {
+            return;
+        }
+
+        UserAccount latestAccount = userManager.findByUsername(authenticatedUser.getUsername());
+        if (latestAccount != null) {
+            authenticatedUser.setAccountBalance(latestAccount.getAccountBalance());
         }
     }
 
@@ -251,7 +197,7 @@ public class ClientHandler implements Runnable {
         try {
             UserAccount user = requireRole(Role.SELLER);
             LocalDateTime startTime = request.getStartTime();
-            LocalDateTime endTime = startTime.plusMinutes(request.getDurationMinutes()); //Tính tgian kết thúc
+            LocalDateTime endTime = startTime.plusMinutes(request.getDurationMinutes());
 
             Auction auction = auctionManager.createAuction(
                     user.getUsername(),
@@ -337,7 +283,6 @@ public class ClientHandler implements Runnable {
             auctionManager.updateAuctionStatus(request.getAuctionId(), request.getNewStatus().name());
             server.broadcastAuctionList(buildAuctionListResponse());
         } catch (AuctionException e) {
-            // Gửi lại lỗi cho client
         }
     }
 
@@ -378,29 +323,19 @@ public class ClientHandler implements Runnable {
     private AuctionView toAuctionView(Auction auction) {
         Item item = auction.getItem();
         String creatorName = item.getDisplayCreator();
-        if (creatorName == null || creatorName.isBlank()) {
-            creatorName = auction.getSellerUsername();
-        }
-        if (creatorName == null || creatorName.isBlank()) {
-            creatorName = "Không rõ";
-        }
+        if (creatorName == null || creatorName.isBlank()) creatorName = auction.getSellerUsername();
+        if (creatorName == null || creatorName.isBlank()) creatorName = "Không rõ";
 
-        // 1. Chuyển đổi lịch sử đặt giá cũ từ stream sang ArrayList để có thể modifiy
         java.util.List<String> historyList = new java.util.ArrayList<>(
                 auction.getBidHistory().stream()
                         .map(this::formatBidHistory)
                         .toList()
         );
 
-        // 2. Kiểm tra trạng thái phiên để tự động công bố kết quả vào Live Stream giống AuctionServer
         String statusStr = auction.getStatus().name();
         if ("FINISHED".equalsIgnoreCase(statusStr)) {
             if (auction.getHighestBidder() != null && auction.getHighestBidder().getUsername() != null) {
-                historyList.add(String.format(
-                        "🏆 [HỆ THỐNG] Phiên đấu giá kết thúc! Người chiến thắng: %s với mức giá %.2f USD",
-                        auction.getHighestBidder().getUsername(),
-                        auction.getCurrentHighestBid()
-                ));
+                historyList.add(String.format("🏆 [HỆ THỐNG] Phiên đấu giá kết thúc! Người chiến thắng: %s với mức giá %.2f USD", auction.getHighestBidder().getUsername(), auction.getCurrentHighestBid()));
             } else {
                 historyList.add("❌ [HỆ THỐNG] Phiên đấu giá kết thúc mà không có người tham gia đặt giá.");
             }
@@ -408,50 +343,20 @@ public class ClientHandler implements Runnable {
             historyList.add("🚫 [HỆ THỐNG] Phiên đấu giá này đã bị hủy bỏ bởi Ban quản trị.");
         }
 
-        // 3. Trả về đối tượng AuctionView đồng bộ cấu trúc dữ liệu mới
         return new AuctionView(
-                auction.getId(),
-                item.getId(),
-                item.getName(),
-                item.getDescription(),
-                creatorName,
-                auction.getSellerUsername(),
-                item.getCategory(),
-                item.getStartingPrice(),
-                item.getCurrentPrice(),
+                auction.getId(), item.getId(), item.getName(), item.getDescription(),
+                creatorName, auction.getSellerUsername(), item.getCategory(),
+                item.getStartingPrice(), item.getCurrentPrice(),
                 auction.getHighestBidder() == null ? null : auction.getHighestBidder().getUsername(),
-                auction.getEndTime(),
-                statusStr,
-                historyList
+                auction.getEndTime(), statusStr, historyList
         );
     }
 
     private String formatBidHistory(BidTransaction transaction) {
-        return String.format(
-                "[%s] %s đặt %.2f USD",
-                transaction.getCreatedAt(),
-                transaction.getBidderUsername(),
-                transaction.getAmount()
-        );
+        return String.format("[%s] %s đặt %.2f USD", transaction.getCreatedAt(), transaction.getBidderUsername(), transaction.getAmount());
     }
 
     public synchronized void sendAuctionList(GetAuctionListResponse response) {
-        try {
-            if (out != null) {
-                out.writeObject(response);
-                out.flush();
-                out.reset();
-            }
-        } catch (IOException e) {
-            System.err.println("Khong gui duoc danh sach dau gia hien tai.");
-        }
-    }
-
-    private synchronized void sendAuctionListLegacy(GetAuctionListResponse response) throws IOException {
-        if (out != null) {
-            out.writeObject(response);
-            out.flush();
-            out.reset();
-        }
+        send(response);
     }
 }

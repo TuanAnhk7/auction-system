@@ -110,10 +110,12 @@ public class LoginController implements Observer {
 
     @Override
     public void onBidResponse(auction.common.model.network.BidResponse response) {
+        // Trống - Không xử lý tại màn hình Login
     }
 
     @Override
     public void onAuctionListResponse(auction.common.model.network.GetAuctionListResponse response) {
+        // Trống - Không xử lý tại màn hình Login
     }
 
     @Override
@@ -124,8 +126,10 @@ public class LoginController implements Observer {
                 return;
             }
 
+            // Gọi Static lưu thông tin vào ClientSession chuẩn chỉ 100%
             ClientSession.setUsername(usernameField.getText().trim());
             ClientSession.setRole(response.getRole());
+            ClientSession.setBalance(response.getBalance());
             AuctionClient.getInstance().removeObserver(this);
 
             try {
@@ -147,6 +151,17 @@ public class LoginController implements Observer {
                 response.isSuccess() ? "Đăng ký thành công" : "Đăng ký thất bại",
                 response.getMessage()
         ));
+    }
+
+    // --- Bổ sung thêm các hàm contract bắt buộc của Interface Observer để tránh lỗi gạch đỏ class ---
+    @Override
+    public void onCreateAuctionResponse(auction.common.model.network.CreateAuctionResponse response) {
+        // Trống
+    }
+
+    @Override
+    public void onUpdateItemResponse(auction.common.model.network.UpdateItemResponse response) {
+        // Trống
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {

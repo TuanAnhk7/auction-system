@@ -46,71 +46,51 @@ public final class AuctionClient {
         observers.remove(observer);
     }
 
-    public synchronized void sendBidRequest(BidRequest request) throws IOException {
-        System.out.println(out);
-        if (out == null) {
-            throw new IOException("Chua ket noi den server.");
-        }
-
+    public synchronized void send(Object request) throws IOException {
+        if (out == null) throw new IOException("Chua ket noi den server.");
         out.writeObject(request);
         out.flush();
         out.reset();
+    }
+
+    public synchronized void sendBidRequest(BidRequest request) throws IOException {
+        send(request);
+    }
+
+    public synchronized void sendAutoBidRequest(AutoBidRequest request) throws IOException {
+        send(request);
     }
 
     public synchronized void sendLoginRequest(LoginRequest request) throws IOException {
-        ensureConnected();
-        out.writeObject(request);
-        out.flush();
-        out.reset();
+        send(request);
     }
 
     public synchronized void sendRegisterRequest(RegisterRequest request) throws IOException {
-        ensureConnected();
-        out.writeObject(request);
-        out.flush();
-        out.reset();
+        send(request);
     }
 
     public synchronized void requestAuctionList() throws IOException {
-        ensureConnected();
-        out.writeObject(new GetAuctionListRequest());
-        out.flush();
-        out.reset();
+        send(new GetAuctionListRequest());
     }
 
     public synchronized void sendCreateAuctionRequest(CreateAuctionRequest request) throws IOException {
-        ensureConnected();
-        out.writeObject(request);
-        out.flush();
-        out.reset();
+        send(request);
     }
 
     public synchronized void sendAdminAuctionActionRequest(AdminAuctionActionRequest request) throws IOException {
-        ensureConnected();
-        out.writeObject(request);
-        out.flush();
-        out.reset();
+        send(request);
     }
     
     public synchronized void sendUpdateItemRequest(UpdateItemRequest request) throws IOException {
-        ensureConnected();
-        out.writeObject(request);
-        out.flush();
-        out.reset();
+        send(request);
     }
 
     public synchronized void sendDeleteAuctionRequest(DeleteAuctionRequest request) throws IOException {
-        ensureConnected();
-        out.writeObject(request);
-        out.flush();
-        out.reset();
+        send(request);
     }
 
     public synchronized void sendChangeStatusRequest(ChangeStatusRequest request) throws IOException {
-        ensureConnected();
-        out.writeObject(request);
-        out.flush();
-        out.reset();
+        send(request);
     }
 
     public synchronized void close() {
@@ -129,6 +109,8 @@ public final class AuctionClient {
                     Object incoming = in.readObject();
                     if (incoming instanceof BidResponse response) {
                         notifyBidObservers(response);
+                    } else if (incoming instanceof AutoBidResponse response) {
+                        notifyAutoBidObservers(response);
                     } else if (incoming instanceof LoginResponse response) {
                         notifyLoginObservers(response);
                     } else if (incoming instanceof RegisterResponse response) {
@@ -152,50 +134,34 @@ public final class AuctionClient {
     }
 
     private void notifyBidObservers(BidResponse response) {
-        for (Observer observer : observers) {
-            observer.onBidResponse(response);
-        }
+        for (Observer observer : observers) observer.onBidResponse(response);
+    }
+
+    private void notifyAutoBidObservers(AutoBidResponse response) {
+        for (Observer observer : observers) observer.onAutoBidResponse(response);
     }
 
     private void notifyAuctionListObservers(GetAuctionListResponse response) {
-        for (Observer observer : observers) {
-            observer.onAuctionListResponse(response);
-        }
+        for (Observer observer : observers) observer.onAuctionListResponse(response);
     }
 
     private void notifyCreateAuctionObservers(CreateAuctionResponse response) {
-        for (Observer observer : observers) {
-            observer.onCreateAuctionResponse(response);
-        }
+        for (Observer observer : observers) observer.onCreateAuctionResponse(response);
     }
 
     private void notifyAdminAuctionActionObservers(AdminAuctionActionResponse response) {
-        for (Observer observer : observers) {
-            observer.onAdminAuctionActionResponse(response);
-        }
+        for (Observer observer : observers) observer.onAdminAuctionActionResponse(response);
     }
 
     private void notifyLoginObservers(LoginResponse response) {
-        for (Observer observer : observers) {
-            observer.onLoginResponse(response);
-        }
+        for (Observer observer : observers) observer.onLoginResponse(response);
     }
 
     private void notifyRegisterObservers(RegisterResponse response) {
-        for (Observer observer : observers) {
-            observer.onRegisterResponse(response);
-        }
+        for (Observer observer : observers) observer.onRegisterResponse(response);
     }
 
     private void notifyUpdateItemObservers(UpdateItemResponse response) {
-        for (Observer observer : observers) {
-            observer.onUpdateItemResponse(response);
-        }
-    }
-
-    private void ensureConnected() throws IOException {
-        if (out == null) {
-            throw new IOException("Chua ket noi den server.");
-        }
+        for (Observer observer : observers) observer.onUpdateItemResponse(response);
     }
 }

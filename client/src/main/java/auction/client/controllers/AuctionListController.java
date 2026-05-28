@@ -21,6 +21,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TableRow;
@@ -45,6 +46,8 @@ public class AuctionListController implements Observer {
     private static final String SORT_END_TIME_ASC = "Sắp kết thúc";
     private static final String SORT_NAME_ASC = "Tên A-Z";
 
+    @FXML
+    private Label balanceLabel;
     @FXML
     private TableView<AuctionView> auctionTable;
     @FXML
@@ -122,6 +125,7 @@ public class AuctionListController implements Observer {
         });
 
         System.out.println("Đang tải danh sách vật phẩm từ Server...");
+        updateBalanceDisplay();
     }
 
     private void configureSearchAndFilter() {
@@ -158,6 +162,12 @@ public class AuctionListController implements Observer {
         // Luồng dữ liệu là: masterAuctionList -> filteredAuctions -> sortedAuctions -> auctionTable.
         sortedAuctions = new SortedList<>(filteredAuctions);
         auctionTable.setItems(sortedAuctions);
+    }
+
+    private void updateBalanceDisplay() {
+        if (balanceLabel != null) {
+            balanceLabel.setText(String.format(Locale.US, "Số dư: %.2f USD", ClientSession.getBalance()));
+        }
     }
 
     private void applyFilters() {
@@ -263,6 +273,9 @@ public class AuctionListController implements Observer {
         bidHistoryListView.getItems().add("Thời gian còn lại: " + selectedAuction.getTimeRemainingDisplay());
         bidHistoryListView.getItems().add("Giá khởi điểm: " + selectedAuction.getStartingPrice() + " USD");
         bidHistoryListView.getItems().add("Giá hiện tại: " + selectedAuction.getCurrentPrice() + " USD");
+        if (bidAmountField != null) {
+            bidAmountField.setText(String.format(Locale.US, "%.2f", selectedAuction.getCurrentPrice() + 1.0));
+        }
         bidHistoryListView.getItems().add("        LỊCH SỬ ĐẶT GIÁ");
         bidHistoryListView.getItems().addAll(selectedAuction.getBidHistoryDisplay());
     }
@@ -314,6 +327,10 @@ public class AuctionListController implements Observer {
 
             auctionTable.refresh();
             bidAmountField.clear();
+            if (response.getBidderUsername().equals(ClientSession.getUsername())) {
+                ClientSession.setBalance(response.getBalance());
+                updateBalanceDisplay();
+            }
         });
     }
 
@@ -370,8 +387,9 @@ public class AuctionListController implements Observer {
                 }
             });
             stage.show();
-        } catch (IOException e) {
-            showError("Không mở được màn hình phiên đấu giá.");
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Không mở được màn hình phiên đấu giá: " + e.getMessage());
         }
     }
 }

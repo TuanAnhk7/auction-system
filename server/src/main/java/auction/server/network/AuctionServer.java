@@ -27,7 +27,7 @@ public class AuctionServer {
     private final ExecutorService clientPool = Executors.newFixedThreadPool(8);
     private final ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     private final Set<ClientHandler> clients = ConcurrentHashMap.newKeySet();
-    private final AuctionManager auctionManager = AuctionManager.getInstance(null);
+    private final AuctionManager auctionManager = AuctionManager.getInstance(auction.server.auth.UserManager.getInstance());
 
     public static void main(String[] args) {
         new AuctionServer().start();
@@ -119,6 +119,30 @@ public class AuctionServer {
             creatorName = "Không rõ";
         }
 
+        // 1. Chuyển đổi lịch sử đặt giá cũ từ stream sang ArrayList để có thể add thêm phần tử
+        java.util.List<String> historyList = new java.util.ArrayList<>(
+                auction.getBidHistory().stream()
+                        .map(this::formatBidHistory)
+                        .toList()
+        );
+
+        // 2. Kiểm tra trạng thái phiên để tự động công bố kết quả vào Live Stream
+        String statusStr = auction.getStatus().name();
+        if ("FINISHED".equalsIgnoreCase(statusStr)) {
+            if (auction.getHighestBidder() != null && auction.getHighestBidder().getUsername() != null) {
+                historyList.add(String.format(
+                        "🏆 [HỆ THỐNG] Phiên đấu giá kết thúc! Người chiến thắng: %s với mức giá %.2f USD",
+                        auction.getHighestBidder().getUsername(),
+                        auction.getCurrentHighestBid()
+                ));
+            } else {
+                historyList.add("❌ [HỆ THỐNG] Phiên đấu giá kết thúc mà không có người tham gia đặt giá.");
+            }
+        } else if ("CANCELED".equalsIgnoreCase(statusStr)) {
+            historyList.add("🚫 [HỆ THỐNG] Phiên đấu giá này đã bị hủy bỏ bởi Ban quản trị.");
+        }
+
+        // 3. Trả về đối tượng AuctionView chứa lịch sử mới đã được chèn thông báo hệ thống
         return new AuctionView(
                 auction.getId(),
                 item.getId(),
@@ -131,10 +155,8 @@ public class AuctionServer {
                 item.getCurrentPrice(),
                 auction.getHighestBidder() == null ? null : auction.getHighestBidder().getUsername(),
                 auction.getEndTime(),
-                auction.getStatus().name(),
-                auction.getBidHistory().stream()
-                        .map(this::formatBidHistory)
-                        .toList()
+                statusStr,
+                historyList
         );
     }
 

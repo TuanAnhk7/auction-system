@@ -3,6 +3,8 @@ package auction.common.model.network;
 import java.io.Serializable;
 
 public class BidRequest implements Serializable {
+    private static final long serialVersionUID = 1L;
+
     private final String auctionId;
     private final String username;
     private final double bidAmount;

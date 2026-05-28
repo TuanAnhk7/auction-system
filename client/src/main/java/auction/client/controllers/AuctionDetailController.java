@@ -168,17 +168,38 @@ public class AuctionDetailController implements Observer {
 
         String oldStatus = oldAuction.getStatus();
         String newStatus = newAuction.getStatus();
-        if (oldStatus.equalsIgnoreCase(newStatus) || newStatus.equalsIgnoreCase(previousStatus)) {
+
+        // Chỉ xử lý nếu trạng thái thực sự thay đổi từ cũ sang mới
+        if (oldStatus.equalsIgnoreCase(newStatus)) {
             return;
         }
 
-        previousStatus = newStatus;
         if ("CANCELED".equalsIgnoreCase(newStatus)) {
-            showInfo("Phiên bị hủy", "Phiên đấu giá đã bị quản trị viên hủy.");
-        } else if ("FINISHED".equalsIgnoreCase(newStatus)) {
-            showInfo("Phiên kết thúc", "Phiên đấu giá đã kết thúc. Người dẫn đầu hiện tại: " + newAuction.getLeadingBidderDisplay());
-        } else if ("RUNNING".equalsIgnoreCase(newStatus) && "OPEN".equalsIgnoreCase(oldStatus)) {
-            showInfo("Phiên bắt đầu", "Phiên đấu giá đã được mở và người dùng có thể theo dõi kết quả.");
+            showInfo("Phiên bị hủy", "🚫 Phiên đấu giá này đã bị quản trị viên hủy bỏ.");
+        }
+        else if ("FINISHED".equalsIgnoreCase(newStatus)) {
+            // Khởi tạo chuỗi thông báo kết quả chi tiết
+            String message;
+            String winner = newAuction.getHighestBidderUsername();
+
+            if (winner != null && !winner.isBlank()) {
+                message = String.format(
+                        "🎉 PHIÊN ĐẤU GIÁ ĐÃ KẾT THÚC! 🎉\n\n" +
+                                "🏆 Người chiến thắng: %s\n" +
+                                "💰 Mức giá cuối cùng: %.2f USD\n\n" +
+                                "Chúc mừng người chiến thắng vật phẩm '%s'!",
+                        winner,
+                        newAuction.getCurrentPrice(),
+                        newAuction.getItemName()
+                );
+            } else {
+                message = String.format("Phiên đấu giá vật phẩm '%s' đã kết thúc nhưng không có ai tham gia đặt giá.", newAuction.getItemName());
+            }
+
+            showInfo("🏆 Thông Báo Người Chiến Thắng", message);
+        }
+        else if ("RUNNING".equalsIgnoreCase(newStatus) && "OPEN".equalsIgnoreCase(oldStatus)) {
+            showInfo("Phiên bắt đầu", "🚀 Phiên đấu giá đã được mở và người dùng có thể tham gia đặt giá!");
         }
     }
 

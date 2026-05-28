@@ -168,21 +168,10 @@ public class AuctionManager {
 
     public List<Auction> closeExpiredAuctions() {
         List<Auction> changedAuctions = new ArrayList<>();
-        List<String> toArchiveIds = new ArrayList<>();
-
+        // Vòng lặp kiểm tra và cập nhật trạng thái khi hết giờ
         for (Auction auction : activeAuctions.values()) {
             if (auction.updateStatusIfExpired()) {
                 changedAuctions.add(auction);
-            }
-            if (auction.getStatus() == AuctionStatus.FINISHED || auction.getStatus() == AuctionStatus.CANCELED) {
-                toArchiveIds.add(auction.getId());
-            }
-        }
-
-        for (String auctionId : toArchiveIds) {
-            Auction archived = activeAuctions.remove(auctionId);
-            if (archived != null) {
-                archivedAuctions.put(auctionId, archived);
             }
         }
         return changedAuctions;

@@ -99,6 +99,13 @@ public final class AuctionClient {
         out.reset();
     }
 
+    public synchronized void sendDeleteAuctionRequest(DeleteAuctionRequest request) throws IOException {
+        ensureConnected();
+        out.writeObject(request);
+        out.flush();
+        out.reset();
+    }
+
     public synchronized void sendChangeStatusRequest(ChangeStatusRequest request) throws IOException {
         ensureConnected();
         out.writeObject(request);

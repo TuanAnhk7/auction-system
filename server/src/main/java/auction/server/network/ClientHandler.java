@@ -54,6 +54,9 @@ public class ClientHandler implements Runnable {
                     handleCreateAuctionRequest(request);
                 } else if (receivedData instanceof UpdateItemRequest request) {
                     handleUpdateItemRequest(request);
+                } else if (receivedData instanceof DeleteAuctionRequest dar) {
+                    // Backwards-compatibility: accept DeleteAuctionRequest from older clients and convert
+                    handleDeleteItemRequest(new DeleteItemRequest(dar.getAuctionId()));
                 } else if (receivedData instanceof DeleteItemRequest request) {
                     handleDeleteItemRequest(request);
                 } else if (receivedData instanceof ChangeStatusRequest request) {
@@ -207,21 +210,31 @@ public class ClientHandler implements Runnable {
 
     private void handleBidRequest(BidRequest request) {
         try {
-            UserAccount user = requireRole(Role.BIDDER);
+            // 1. Kiểm tra đăng nhập
+            ensureAuthenticated();
+            UserAccount user = authenticatedUser;
+
+            // 2. Gọi hàm xử lý - Truyền TRỰC TIẾP chuỗi String (request.getAuctionId())
+            // Không thực hiện ép kiểu sang int nữa để tránh lỗi "incompatible types"
             auctionManager.placeBidByItemId(request.getAuctionId(), user.getUsername(), request.getBidAmount());
 
+            // 3. Tìm lại phiên bằng chuỗi String ID
             Auction updatedAuction = auctionManager.findByItemId(request.getAuctionId())
-                    .orElseThrow(() -> new InvalidBidException("Khong tim thay phien dau gia sau khi cap nhat."))
-                    ;
+                    .orElseThrow(() -> new InvalidBidException("Không tìm thấy phiên đấu giá sau khi cập nhật."));
 
+            // 4. Phát sóng cập nhật giá mới cho tất cả các Client đang online
             server.broadcast(new BidResponse(
                     true,
-                    "Dat gia thanh cong.",
+                    "Đặt giá thành công.",
                     toAuctionView(updatedAuction),
                     user.getUsername()
             ));
         } catch (AuctionException e) {
+            // Trả về thông báo lỗi nghiệp vụ riêng cho Client đặt giá
             send(new BidResponse(false, e.getMessage(), null));
+        } catch (Exception e) {
+            send(new BidResponse(false, "Lỗi hệ thống khi đặt giá: " + e.getMessage(), null));
+            e.printStackTrace();
         }
     }
 
@@ -372,6 +385,30 @@ public class ClientHandler implements Runnable {
             creatorName = "Không rõ";
         }
 
+        // 1. Chuyển đổi lịch sử đặt giá cũ từ stream sang ArrayList để có thể modifiy
+        java.util.List<String> historyList = new java.util.ArrayList<>(
+                auction.getBidHistory().stream()
+                        .map(this::formatBidHistory)
+                        .toList()
+        );
+
+        // 2. Kiểm tra trạng thái phiên để tự động công bố kết quả vào Live Stream giống AuctionServer
+        String statusStr = auction.getStatus().name();
+        if ("FINISHED".equalsIgnoreCase(statusStr)) {
+            if (auction.getHighestBidder() != null && auction.getHighestBidder().getUsername() != null) {
+                historyList.add(String.format(
+                        "🏆 [HỆ THỐNG] Phiên đấu giá kết thúc! Người chiến thắng: %s với mức giá %.2f USD",
+                        auction.getHighestBidder().getUsername(),
+                        auction.getCurrentHighestBid()
+                ));
+            } else {
+                historyList.add("❌ [HỆ THỐNG] Phiên đấu giá kết thúc mà không có người tham gia đặt giá.");
+            }
+        } else if ("CANCELED".equalsIgnoreCase(statusStr)) {
+            historyList.add("🚫 [HỆ THỐNG] Phiên đấu giá này đã bị hủy bỏ bởi Ban quản trị.");
+        }
+
+        // 3. Trả về đối tượng AuctionView đồng bộ cấu trúc dữ liệu mới
         return new AuctionView(
                 auction.getId(),
                 item.getId(),
@@ -384,10 +421,8 @@ public class ClientHandler implements Runnable {
                 item.getCurrentPrice(),
                 auction.getHighestBidder() == null ? null : auction.getHighestBidder().getUsername(),
                 auction.getEndTime(),
-                auction.getStatus().name(),
-                auction.getBidHistory().stream()
-                        .map(this::formatBidHistory)
-                        .toList()
+                statusStr,
+                historyList
         );
     }
 

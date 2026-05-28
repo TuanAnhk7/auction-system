@@ -202,8 +202,35 @@ public class SellerDashboardController implements Observer {
     @FXML
     private void handleDeleteAuction() {
         AuctionView selected = myAuctionsTable.getSelectionModel().getSelectedItem();
-        if (selected != null) {
-            showAlert(Alert.AlertType.INFORMATION, "Chức năng", "Chức năng Xóa chưa được triển khai cho vật phẩm: " + selected.getItemName());
+        if (selected == null) {
+            return;
+        }
+
+        // Chỉ cho xóa phiên OPEN (chưa bắt đầu)
+        if (!selected.getStatus().equals("OPEN")) {
+            showAlert(Alert.AlertType.WARNING, "Không thể xóa",
+                    "Chỉ có thể xóa phiên ở trạng thái OPEN!");
+            return;
+        }
+
+        // Hỏi xác nhận trước khi xóa
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Xác nhận xóa");
+        confirm.setHeaderText("Xóa phiên đấu giá?");
+        confirm.setContentText("Bạn có chắc chắn muốn xóa phiên: " + selected.getItemName() + "?");
+
+        Optional<ButtonType> result = confirm.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            try {
+                // Gửi request xóa đến server
+                DeleteAuctionRequest request = new DeleteAuctionRequest(selected.getAuctionId());
+                AuctionClient.getInstance().sendDeleteAuctionRequest(request);
+                showAlert(Alert.AlertType.INFORMATION, "Thành công", "Phiên đấu giá đã được xóa.");
+                handleRefreshMyAuctions();
+            } catch (IOException e) {
+                showAlert(Alert.AlertType.ERROR, "Lỗi mạng",
+                        "Không gửi được yêu cầu xóa. Kiểm tra kết nối và thử lại.");
+            }
         }
     }
 

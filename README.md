@@ -43,8 +43,3 @@ Dự án tuân thủ nghiêm ngặt các nguyên lý OOP (SOLID) và áp dụng 
 ### Yêu cầu hệ thống
 * Đã cài đặt **Java JDK 17** trở lên.
 * Đã cài đặt **Maven**.
-
-### Bước 1: Clone dự án
-```bash
-git clone [https://github.com/TuanAnhK7/auction-system.git](https://github.com/TuanAnhK7/auction-system.git)
-cd auction-system# auction-system

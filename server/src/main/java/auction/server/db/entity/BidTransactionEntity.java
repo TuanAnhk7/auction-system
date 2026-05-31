@@ -2,19 +2,29 @@ package auction.server.db.entity;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
 @Entity
 @Table(name = "bid_transactions")
 public class BidTransactionEntity {
+    private static final DateTimeFormatter DB_TIMESTAMP_FORMAT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
     @Id
+    @Column(name = "id")
     private String id;
 
+    @Column(name = "auction_id", nullable = false)
     private String auctionId;
 
+    @Column(name = "bidder_username", nullable = false)
     private String bidderUsername;
 
+    @Column(name = "amount", nullable = false)
     private double amount;
 
-    @Column(columnDefinition = "DATETIME DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "created_at")
     private String createdAt;
 
     // Constructor mặc định cho JPA
@@ -28,6 +38,13 @@ public class BidTransactionEntity {
         this.bidderUsername = bidderUsername;
         this.amount = amount;
         this.createdAt = createdAt;
+    }
+
+    @PrePersist
+    private void prePersist() {
+        if (createdAt == null || createdAt.isBlank()) {
+            createdAt = LocalDateTime.now().format(DB_TIMESTAMP_FORMAT);
+        }
     }
 
     // --- Các hàm Getter và Setter thuần túy ---

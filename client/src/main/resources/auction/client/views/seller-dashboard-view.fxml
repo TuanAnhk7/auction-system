@@ -65,6 +65,16 @@
                     <TextArea fx:id="descriptionArea" wrapText="true" prefRowCount="3" promptText="Viết mô tả ngắn gọn về sản phẩm..."
                               style="-fx-border-color: #BDBDBD; -fx-border-radius: 4; -fx-background-radius: 4;"
                               GridPane.columnIndex="1" GridPane.columnSpan="3" GridPane.rowIndex="2"/>
+
+                    <Label fx:id="specificProp1Label" text="Nghệ sĩ:" style="-fx-font-weight: bold; -fx-text-fill: #757575;" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+                    <TextField fx:id="specificProp1Field" promptText="Ví dụ: Vincent van Gogh"
+                               style="-fx-padding: 8 12; -fx-border-color: #BDBDBD; -fx-border-radius: 4; -fx-background-radius: 4;"
+                               GridPane.columnIndex="1" GridPane.rowIndex="3"/>
+
+                    <Label fx:id="specificProp2Label" text="Năm sáng tác:" style="-fx-font-weight: bold; -fx-text-fill: #757575;" GridPane.columnIndex="2" GridPane.rowIndex="3"/>
+                    <TextField fx:id="specificProp2Field" promptText="Ví dụ: 1889"
+                               style="-fx-padding: 8 12; -fx-border-color: #BDBDBD; -fx-border-radius: 4; -fx-background-radius: 4;"
+                               GridPane.columnIndex="3" GridPane.rowIndex="3"/>
                 </GridPane>
 
                 <HBox alignment="CENTER_RIGHT">

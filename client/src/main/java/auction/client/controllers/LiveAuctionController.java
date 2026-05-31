@@ -62,6 +62,7 @@ public class LiveAuctionController implements Observer {
     private boolean finalResultAddedToStream;
     private AuctionHistoryChart chart;
     private List<Bidder.Bid> bids = new ArrayList<>();
+    private int displayedBidHistoryCount;
 
     public void setAuctionHistoryChart(AuctionHistoryChart chart) {
         this.chart = chart;
@@ -98,9 +99,11 @@ public class LiveAuctionController implements Observer {
         this.auctionView = auctionView;
         this.previousStatus = auctionView.getStatus();
         this.finalResultAddedToStream = false;
+        this.displayedBidHistoryCount = 0;
 
         refreshAuctionHistoryChart();
         refreshView();
+        syncLiveBidStreamWithHistory(auctionView, true);
         updateBalanceDisplay();
         startCountdown();
     }
@@ -172,7 +175,6 @@ public class LiveAuctionController implements Observer {
             );
 
             AuctionClient.getInstance().sendAutoBidRequest(request);
-            showInfo("Thành công", "Đã gửi yêu cầu cài đặt đấu giá tự động lên hệ thống!");
         } catch (NumberFormatException e) {
             showError("Vui lòng nhập định dạng số cho Max Bid và Increment!");
         } catch (InvalidBidException e) {
@@ -224,6 +226,7 @@ public class LiveAuctionController implements Observer {
                 this.auctionView = response.getUpdatedAuction();
                 refreshAuctionHistoryChart();
                 refreshView();
+                syncLiveBidStreamWithHistory(response.getUpdatedAuction(), false);
                 checkStatusTransition();
             }
             if (response.getBidderUsername() != null
@@ -231,13 +234,23 @@ public class LiveAuctionController implements Observer {
                 ClientSession.setBalance(response.getBalance());
                 updateBalanceDisplay();
             }
-            if (response.getMessage() != null && !response.getMessage().isEmpty()
-                    && auctionView != null
-                    && response.getUpdatedAuction() != null
-                    && auctionView.getAuctionId().equals(response.getUpdatedAuction().getAuctionId())) {
-                String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-                liveBidStream.getItems().add(0, "[" + time + "] " + response.getMessage());
+        });
+    }
+
+    @Override
+    public void onAutoBidResponse(AutoBidResponse response) {
+        if (response == null) {
+            return;
+        }
+
+        Platform.runLater(() -> {
+            if (!response.isSuccess()) {
+                showError(response.getMessage());
+                return;
             }
+
+            String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
+            liveBidStream.getItems().add(0, String.format("[%s] [HỆ THỐNG] %s", time, response.getMessage()));
         });
     }
 
@@ -255,6 +268,7 @@ public class LiveAuctionController implements Observer {
             this.auctionView = response.getUpdatedAuction();
             refreshAuctionHistoryChart();
             refreshView();
+            syncLiveBidStreamWithHistory(response.getUpdatedAuction(), false);
             updateCountdown();
         });
     }
@@ -282,6 +296,7 @@ public class LiveAuctionController implements Observer {
                         this.auctionView = updated;
                         refreshAuctionHistoryChart();
                         refreshView();
+                        syncLiveBidStreamWithHistory(updated, false);
                         checkStatusTransition();
                     });
         });
@@ -419,6 +434,27 @@ public class LiveAuctionController implements Observer {
         String w = a.getLeadingBidderDisplay();
         String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
         liveBidStream.getItems().add(0, String.format("[%s] Kết quả cuối phiên: %s", time, "Chưa có".equalsIgnoreCase(w) ? "chưa có người thắng." : w + " thắng với giá " + String.format("%.2f USD", a.getCurrentPrice())));
+    }
+
+    private void syncLiveBidStreamWithHistory(AuctionView updatedAuction, boolean replaceAll) {
+        if (updatedAuction == null || liveBidStream == null) {
+            return;
+        }
+
+        List<String> history = updatedAuction.getBidHistoryDisplay();
+        if (replaceAll || displayedBidHistoryCount > history.size()) {
+            liveBidStream.getItems().clear();
+            for (int i = history.size() - 1; i >= 0; i--) {
+                liveBidStream.getItems().add(history.get(i));
+            }
+            displayedBidHistoryCount = history.size();
+            return;
+        }
+
+        for (int i = displayedBidHistoryCount; i < history.size(); i++) {
+            liveBidStream.getItems().add(0, history.get(i));
+        }
+        displayedBidHistoryCount = history.size();
     }
 
     private void appendCancellationToStream() {

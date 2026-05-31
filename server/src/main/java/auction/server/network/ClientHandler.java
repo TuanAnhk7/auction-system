@@ -142,6 +142,8 @@ public class ClientHandler implements Runnable {
                     .orElseThrow(() -> new InvalidBidException("Không tìm thấy phiên đấu giá sau khi cập nhật."));
 
             broadcastAuctionExtensionIfNeeded(updatedAuction, previousEndTime);
+            server.persistAuctionSnapshot(updatedAuction);
+            server.persistAuctionBidHistory(updatedAuction);
 
             server.broadcast(new BidResponse(
                     true,
@@ -172,6 +174,8 @@ public class ClientHandler implements Runnable {
             Auction updatedAuction = auctionManager.findById(request.getAuctionId())
                     .orElseThrow(() -> new InvalidBidException("Không tìm thấy phiên đấu giá."));
 
+            server.persistAuctionSnapshot(updatedAuction);
+            server.persistAuctionBidHistory(updatedAuction);
             send(new AutoBidResponse(true, "Đăng ký tự động thầu thành công."));
             broadcastAuctionExtensionIfNeeded(updatedAuction, previousEndTime);
             if (Double.compare(updatedAuction.getCurrentHighestBid(), previousHighestBid) != 0) {
@@ -283,6 +287,7 @@ public class ClientHandler implements Runnable {
                 send(new CreateAuctionResponse(false, "Loại vật phẩm chưa được hỗ trợ.", null));
                 return;
             }
+            server.persistAuctionSnapshot(auction);
             AuctionView createdAuction = toAuctionView(auction);
             send(new CreateAuctionResponse(true, "Đăng ký đấu giá thành công. Phiên đang chờ Admin mở.", createdAuction));
             server.broadcastAuctionList(buildAuctionListResponse());
@@ -308,6 +313,7 @@ public class ClientHandler implements Runnable {
                     request.getNewDescription()
             );
 
+            server.persistAuctionSnapshot(auctionToUpdate);
             send(new UpdateItemResponse(true, "Cập nhật sản phẩm thành công.", null));
             server.broadcastAuctionList(buildAuctionListResponse());
         } catch (AuctionException e) {
@@ -328,6 +334,7 @@ public class ClientHandler implements Runnable {
                 throw new AuctionException("Bạn không có quyền xóa phiên đấu giá này.");
             }
 
+            server.deleteAuctionSnapshot(auctionToDelete);
             auctionManager.removeAuction(request.getAuctionId());
             send(new DeleteItemResponse(true, "Xóa sản phẩm thành công."));
             server.broadcastAuctionList(buildAuctionListResponse());
@@ -350,6 +357,8 @@ public class ClientHandler implements Runnable {
             }
 
             auctionManager.updateAuctionStatus(request.getAuctionId(), request.getNewStatus().name());
+            server.persistAuctionSnapshot(auctionToUpdate);
+            server.persistAuctionBidHistory(auctionToUpdate);
             server.broadcastAuctionList(buildAuctionListResponse());
         } catch (AuctionException e) {
         }
@@ -360,6 +369,8 @@ public class ClientHandler implements Runnable {
             requireRole(Role.ADMIN);
             Auction auction = auctionManager.updateAuctionStatus(request.getAuctionId(), request.getAction());
             AuctionView updatedAuction = toAuctionView(auction);
+            server.persistAuctionSnapshot(auction);
+            server.persistAuctionBidHistory(auction);
             send(new AdminAuctionActionResponse(true, "Cập nhật trạng thái thành công.", updatedAuction));
             server.broadcastAuctionList(buildAuctionListResponse());
         } catch (AuctionException e) {

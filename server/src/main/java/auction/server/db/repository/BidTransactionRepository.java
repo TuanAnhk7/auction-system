@@ -17,7 +17,11 @@ public class BidTransactionRepository {
         EntityManager em = emf.createEntityManager();
         try {
             em.getTransaction().begin();
-            em.persist(bid);
+            if (em.find(BidTransactionEntity.class, bid.getId()) != null) {
+                em.merge(bid);
+            } else {
+                em.persist(bid);
+            }
             em.getTransaction().commit();
         } catch (Exception e) {
             em.getTransaction().rollback();
@@ -33,6 +37,22 @@ public class BidTransactionRepository {
             Query query = em.createQuery("SELECT b FROM BidTransactionEntity b WHERE b.auctionId = :auctionId");
             query.setParameter("auctionId", auctionId);
             return query.getResultList();
+        } finally {
+            em.close();
+        }
+    }
+
+    public void deleteByAuctionId(String auctionId) {
+        EntityManager em = emf.createEntityManager();
+        try {
+            em.getTransaction().begin();
+            em.createQuery("DELETE FROM BidTransactionEntity b WHERE b.auctionId = :auctionId")
+                    .setParameter("auctionId", auctionId)
+                    .executeUpdate();
+            em.getTransaction().commit();
+        } catch (Exception e) {
+            em.getTransaction().rollback();
+            throw e;
         } finally {
             em.close();
         }

@@ -5,6 +5,7 @@ import auction.common.exception.AuctionException;
 import auction.common.exception.InvalidBidException;
 import auction.common.model.item.Antique;
 import auction.common.model.item.Art;
+import auction.common.model.item.Electronics;
 import auction.common.model.item.Item;
 import auction.common.model.user.Bidder;
 import auction.common.model.network.UserAccount;
@@ -64,6 +65,8 @@ public class AuctionManager {
             item = new Art(name, description, startingPrice, startInstant, endInstant, sellerUsername, specificProp1, specificProp2);
         } else if ("antique".equalsIgnoreCase(type) || "antiques".equalsIgnoreCase(type)) {
             item = new Antique(name, description, startingPrice, startInstant, endInstant, sellerUsername, specificProp1, specificProp2);
+        } else if ("electronics".equalsIgnoreCase(type)) {
+            item = new Electronics(name, description, startingPrice, startInstant, endInstant, sellerUsername, specificProp1, specificProp2);
         }
         if (item != null) {
             Auction auction = new Auction(item, startTime, endTime, sellerUsername);

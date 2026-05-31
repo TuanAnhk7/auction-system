@@ -31,6 +31,14 @@ public class SellerDashboardController implements Observer {
     @FXML
     private ComboBox<String> itemTypeComboBox;
     @FXML
+    private Label specificProp1Label;
+    @FXML
+    private TextField specificProp1Field;
+    @FXML
+    private Label specificProp2Label;
+    @FXML
+    private TextField specificProp2Field;
+    @FXML
     private TextArea descriptionArea;
     @FXML
     private TableView<AuctionView> myAuctionsTable;
@@ -57,8 +65,10 @@ public class SellerDashboardController implements Observer {
 
     @FXML
     public void initialize() {
-        itemTypeComboBox.setItems(FXCollections.observableArrayList("Art", "Antique"));
+        itemTypeComboBox.setItems(FXCollections.observableArrayList("Art", "Antique", "Electronics"));
         itemTypeComboBox.setValue("Art");
+        itemTypeComboBox.valueProperty().addListener((obs, oldValue, newValue) -> configureSpecificFields(newValue));
+        configureSpecificFields(itemTypeComboBox.getValue());
         durationMinutesField.setText("60");
 
         myProductColumn.setCellValueFactory(new PropertyValueFactory<>("itemName"));
@@ -102,6 +112,23 @@ public class SellerDashboardController implements Observer {
             String itemType = itemTypeComboBox.getValue();
             double startingPrice = Double.parseDouble(startingPriceField.getText().trim());
             long durationMinutes = Long.parseLong(durationMinutesField.getText().trim());
+            String specificProp1 = specificProp1Field.getText().trim();
+            String specificProp2Text = specificProp2Field.getText().trim();
+
+            if (itemType == null || itemType.isBlank()) {
+                throw new IllegalArgumentException("Vui lòng chọn loại vật phẩm.");
+            }
+            if (specificProp1.isBlank()) {
+                throw new IllegalArgumentException(getSpecificProp1Label(itemType) + " không được để trống.");
+            }
+            if (specificProp2Text.isBlank()) {
+                throw new IllegalArgumentException(getSpecificProp2Label(itemType) + " không được để trống.");
+            }
+
+            int specificProp2 = Integer.parseInt(specificProp2Text);
+            if (specificProp2 <= 0) {
+                throw new IllegalArgumentException(getSpecificProp2Label(itemType) + " phải lớn hơn 0.");
+            }
 
             // FIX: Gọi phương thức static ClientSession.getUsername() chuẩn xác thay vì tạo thực thể biến cục bộ bị lỗi
             AuctionClient.getInstance().sendCreateAuctionRequest(new CreateAuctionRequest(
@@ -112,11 +139,12 @@ public class SellerDashboardController implements Observer {
                     itemType,
                     LocalDateTime.now(),
                     durationMinutes,
-                    "",
-                    0
+                    specificProp1,
+                    specificProp2
             ));
         } catch (NumberFormatException e) {
-            showAlert(Alert.AlertType.ERROR, "Dữ liệu không hợp lệ", "Giá khởi điểm và thời lượng phải là số hợp lệ.");
+            showAlert(Alert.AlertType.ERROR, "Dữ liệu không hợp lệ",
+                    "Giá khởi điểm, thời lượng và thông tin đặc thù phải là số hợp lệ.");
         } catch (IllegalArgumentException e) {
             showAlert(Alert.AlertType.ERROR, "Dữ liệu không hợp lệ", e.getMessage());
         } catch (IOException e) {
@@ -297,6 +325,49 @@ public class SellerDashboardController implements Observer {
         descriptionArea.clear();
         itemTypeComboBox.setValue("Art");
         durationMinutesField.setText("60");
+        specificProp1Field.clear();
+        specificProp2Field.clear();
+        configureSpecificFields("Art");
+    }
+
+    private void configureSpecificFields(String itemType) {
+        String type = itemType == null ? "Art" : itemType;
+        specificProp1Label.setText(getSpecificProp1Label(type) + ":");
+        specificProp2Label.setText(getSpecificProp2Label(type) + ":");
+        specificProp1Field.setPromptText(getSpecificProp1Prompt(type));
+        specificProp2Field.setPromptText(getSpecificProp2Prompt(type));
+    }
+
+    private String getSpecificProp1Label(String itemType) {
+        return switch (itemType == null ? "" : itemType.toLowerCase()) {
+            case "antique" -> "Xuất xứ";
+            case "electronics" -> "Thương hiệu";
+            default -> "Nghệ sĩ";
+        };
+    }
+
+    private String getSpecificProp2Label(String itemType) {
+        return switch (itemType == null ? "" : itemType.toLowerCase()) {
+            case "antique" -> "Tuổi ước tính (năm)";
+            case "electronics" -> "Bảo hành (tháng)";
+            default -> "Năm sáng tác";
+        };
+    }
+
+    private String getSpecificProp1Prompt(String itemType) {
+        return switch (itemType == null ? "" : itemType.toLowerCase()) {
+            case "antique" -> "Ví dụ: Pháp";
+            case "electronics" -> "Ví dụ: Apple";
+            default -> "Ví dụ: Vincent van Gogh";
+        };
+    }
+
+    private String getSpecificProp2Prompt(String itemType) {
+        return switch (itemType == null ? "" : itemType.toLowerCase()) {
+            case "antique" -> "Ví dụ: 120";
+            case "electronics" -> "Ví dụ: 12";
+            default -> "Ví dụ: 1889";
+        };
     }
 
     private void showAlert(Alert.AlertType type, String title, String message) {

@@ -4,10 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="cb69a275-d8da-4bad-af8d-135e8721f859" name="Changes" comment="fix lỗi">
+    <list default="true" id="cb69a275-d8da-4bad-af8d-135e8721f859" name="Changes" comment="file jar. đã maven-shade-plugin">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/client/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/client/pom.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/pom.xml" beforeDir="false" afterPath="$PROJECT_DIR$/server/pom.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main/java/auction/client/controllers/LiveAuctionController.java" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/java/auction/client/controllers/LiveAuctionController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main/java/auction/client/controllers/SellerDashboardController.java" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/java/auction/client/controllers/SellerDashboardController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/client/src/main/resources/auction/client/views/seller-dashboard-view.fxml" beforeDir="false" afterPath="$PROJECT_DIR$/client/src/main/resources/auction/client/views/seller-dashboard-view.fxml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/Auction.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/Auction.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/AuctionManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/auction/common/model/auction/AuctionManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/common/src/main/java/auction/common/support/SampleDataFactory.java" beforeDir="false" afterPath="$PROJECT_DIR$/common/src/main/java/auction/common/support/SampleDataFactory.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/main/java/auction/server/db/PersistenceManager.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/auction/server/db/PersistenceManager.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/main/java/auction/server/db/entity/AuctionEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/auction/server/db/entity/AuctionEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/main/java/auction/server/db/entity/BidTransactionEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/auction/server/db/entity/BidTransactionEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/main/java/auction/server/db/entity/ItemEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/auction/server/db/entity/ItemEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/main/java/auction/server/db/entity/UserEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/auction/server/db/entity/UserEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/main/java/auction/server/db/repository/BidTransactionRepository.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/auction/server/db/repository/BidTransactionRepository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/main/java/auction/server/network/AuctionServer.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/auction/server/network/AuctionServer.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/main/java/auction/server/network/ClientHandler.java" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/java/auction/server/network/ClientHandler.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/src/main/resources/META-INF/persistence.xml" beforeDir="false" afterPath="$PROJECT_DIR$/server/src/main/resources/META-INF/persistence.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -244,7 +257,15 @@
       <option name="project" value="LOCAL" />
       <updated>1780232736024</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="file jar. đã maven-shade-plugin">
+      <option name="closed" value="true" />
+      <created>1780233548808</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1780233548808</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -276,7 +297,8 @@
     <MESSAGE value="feat: create basic AuctionServer and ClientHandler for networking" />
     <MESSAGE value="giao diện cơ bản (login, danh sách)" />
     <MESSAGE value="fix lỗi" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix lỗi" />
+    <MESSAGE value="file jar. đã maven-shade-plugin" />
+    <option name="LAST_COMMIT_MESSAGE" value="file jar. đã maven-shade-plugin" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

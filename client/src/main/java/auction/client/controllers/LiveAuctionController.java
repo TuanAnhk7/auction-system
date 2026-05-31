@@ -3,8 +3,10 @@ package auction.client.controllers;
 import auction.client.ClientSession;
 import auction.client.network.AuctionClient;
 import auction.client.network.Observer;
+import auction.client.view.AuctionHistoryChart;
 import auction.common.exception.InvalidBidException;
 import auction.common.model.network.*;
+import auction.common.model.user.Bidder;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -19,12 +21,23 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javafx.scene.layout.VBox;
 
 public class LiveAuctionController implements Observer {
+    private static final Pattern BID_HISTORY_PATTERN =
+            Pattern.compile("^\\[(.+?)]\\s+(.+?)\\s+đặt\\s+([0-9]+(?:[.,][0-9]+)?)\\s+USD$");
+
     @FXML private Label lblBalance;
     @FXML private Label lblItemName;
     @FXML private Label lblCurrentPrice;
@@ -40,30 +53,62 @@ public class LiveAuctionController implements Observer {
     @FXML private TextField txtIncrement;
     @FXML private Button btnRegisterAutoBid;
     @FXML private ListView<String> liveBidStream;
+    @FXML private VBox chartContainer;
 
     private AuctionView auctionView;
     private Timeline countdownTimeline;
     private String previousStatus;
     private boolean endPopupShown;
     private boolean finalResultAddedToStream;
+    private AuctionHistoryChart chart;
+    private List<Bidder.Bid> bids = new ArrayList<>();
+
+    public void setAuctionHistoryChart(AuctionHistoryChart chart) {
+        this.chart = chart;
+    }
+
+    public void onNewBid(Bidder.Bid bid) {
+        bids.add(bid);
+        if (chart != null) {
+            chart.updateChart(bids);
+        }
+    }
 
     @FXML
     public void initialize() {
+        System.out.println("LIVE AUCTION INITIALIZE RUNNING");
+        System.out.println("chartContainer = " + chartContainer);
+
         AuctionClient.getInstance().addObserver(this);
-        configureLiveBidStream();
-        updateBalanceDisplay();
+
+        chart = new AuctionHistoryChart();
+        chart.setPrefHeight(250);
+
+        if (chartContainer != null) {
+            chartContainer.getChildren().setAll(chart);
+            System.out.println("chartContainer children = "
+                    + chartContainer.getChildren().size());
+        } else {
+            System.err.println("chartContainer is null; live auction chart will not be shown.");
+        }
+
     }
 
     public void setAuctionView(AuctionView auctionView) {
         this.auctionView = auctionView;
         this.previousStatus = auctionView.getStatus();
         this.finalResultAddedToStream = false;
+
+        refreshAuctionHistoryChart();
         refreshView();
         updateBalanceDisplay();
         startCountdown();
     }
 
-        public void cleanup() {
+    private void loadBidHistoryToChart() {
+    }
+
+    public void cleanup() {
         if (countdownTimeline != null) {
             countdownTimeline.stop();
         }
@@ -177,6 +222,7 @@ public class LiveAuctionController implements Observer {
                     && auctionView != null
                     && auctionView.getAuctionId().equals(response.getUpdatedAuction().getAuctionId())) {
                 this.auctionView = response.getUpdatedAuction();
+                refreshAuctionHistoryChart();
                 refreshView();
                 checkStatusTransition();
             }
@@ -207,6 +253,7 @@ public class LiveAuctionController implements Observer {
 
         Platform.runLater(() -> {
             this.auctionView = response.getUpdatedAuction();
+            refreshAuctionHistoryChart();
             refreshView();
             updateCountdown();
         });
@@ -233,6 +280,7 @@ public class LiveAuctionController implements Observer {
                     .findFirst()
                     .ifPresent(updated -> {
                         this.auctionView = updated;
+                        refreshAuctionHistoryChart();
                         refreshView();
                         checkStatusTransition();
                     });
@@ -245,6 +293,17 @@ public class LiveAuctionController implements Observer {
         }
     }
 
+    private void refreshAuctionHistoryChart() {
+        if (auctionView == null) {
+            return;
+        }
+
+        bids = convertHistoryToBids(auctionView.getBidHistory());
+        if (chart != null) {
+            chart.updateChart(bids);
+        }
+    }
+
     private void refreshView() {
         if (auctionView == null) return;
         lblItemName.setText(auctionView.getItemName());
@@ -254,6 +313,7 @@ public class LiveAuctionController implements Observer {
         if (txtBidAmount != null && txtBidAmount.getText().isEmpty()) {
             txtBidAmount.setText(String.format(Locale.US, "%.2f", auctionView.getCurrentPrice() + 1.0));
         }
+        updateCountdown();
     }
 
     private void updateCountdown() {
@@ -365,5 +425,41 @@ public class LiveAuctionController implements Observer {
         if (finalResultAddedToStream) return;
         finalResultAddedToStream = true;
         liveBidStream.getItems().add(0, "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + "] Phiên đấu giá đã bị hủy bởi quản trị viên.");
+    }
+
+    private List<Bidder.Bid> convertHistoryToBids(List<String> history) {
+        List<Bidder.Bid> result = new ArrayList<>();
+        if (history == null) {
+            return result;
+        }
+
+        for (String line : history) {
+            try {
+                if (line == null || line.isBlank()) {
+                    continue;
+                }
+
+                Matcher matcher = BID_HISTORY_PATTERN.matcher(line.trim());
+                if (!matcher.matches()) {
+                    continue;
+                }
+
+                LocalDateTime time = parseHistoryTime(matcher.group(1).trim());
+                String username = matcher.group(2).trim();
+                double amount = Double.parseDouble(matcher.group(3).replace(',', '.'));
+                result.add(new Bidder.Bid(username, amount, time));
+            } catch (Exception e) {
+                System.err.println("Bỏ qua dòng lịch sử bid không hợp lệ: " + line);
+            }
+        }
+        return result;
+    }
+
+    private LocalDateTime parseHistoryTime(String rawTime) {
+        try {
+            return LocalDateTime.parse(rawTime, DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        } catch (DateTimeParseException ignored) {
+            return LocalDateTime.ofInstant(Instant.parse(rawTime), ZoneId.systemDefault());
+        }
     }
 }

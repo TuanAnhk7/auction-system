@@ -9,15 +9,15 @@ public class PersistenceManager {
     private static volatile PersistenceManager instance;
     private final EntityManagerFactory emf;
 
-    private final UserRepository userRepository;
-    private final AuctionRepository auctionRepository;
+    private final UserRepositoryImpl userRepositoryImpl;
+    private final AuctionRepositoryImpl auctionRepositoryImpl;
     private final ItemRepository itemRepository;
     private final BidTransactionRepository bidTransactionRepository;
 
     private PersistenceManager() {
         this.emf = Persistence.createEntityManagerFactory("auction-pu");
-        this.userRepository = new UserRepository(emf);
-        this.auctionRepository = new AuctionRepository(emf);
+        this.userRepositoryImpl = new UserRepositoryImpl(emf);
+        this.auctionRepositoryImpl = new AuctionRepositoryImpl(emf);
         this.itemRepository = new ItemRepository(emf);
         this.bidTransactionRepository = new BidTransactionRepository(emf);
     }
@@ -33,12 +33,12 @@ public class PersistenceManager {
         return instance;
     }
 
-    public UserRepository getUserRepository() {
-        return userRepository;
+    public UserRepositoryImpl getUserRepository() {
+        return userRepositoryImpl;
     }
 
-    public AuctionRepository getAuctionRepository() {
-        return auctionRepository;
+    public AuctionRepositoryImpl getAuctionRepository() {
+        return auctionRepositoryImpl;
     }
 
     public ItemRepository getItemRepository() {

@@ -3,6 +3,7 @@ package auction.common.model.user;
 import auction.common.model.item.Art;
 import auction.common.model.item.Item;
 import auction.common.model.item.Antique;
+import auction.common.model.network.Role;
 // import auction.common.model.item.Art; // Import class Art của bạn tại đây
 
 import java.time.Instant;

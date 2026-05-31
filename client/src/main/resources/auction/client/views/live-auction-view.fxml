@@ -98,11 +98,17 @@
                     </VBox>
                 </VBox>
 
-                <VBox spacing="10.0" HBox.hgrow="ALWAYS" prefWidth="350.0" style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
-                    <Label text="📡 Lịch sử &amp; Thông báo" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1976D2;"/>
-                    <Separator style="-fx-padding: 0;"/>
-                    <ListView fx:id="liveBidStream" VBox.vgrow="ALWAYS"
-                              style="-fx-background-color: transparent; -fx-control-inner-background: white; -fx-border-color: transparent;"/>
+                <VBox spacing="10.0" HBox.hgrow="ALWAYS" prefWidth="350.0">
+                    <VBox fx:id="chartContainer" prefHeight="300.0"
+                          style="-fx-background-color: white; -fx-padding: 15; -fx-background-radius: 8;" />
+
+                    <VBox spacing="10.0" VBox.vgrow="ALWAYS"
+                          style="-fx-background-color: white; -fx-padding: 20; -fx-background-radius: 8;">
+                        <Label text="📡 Lịch sử &amp; Thông báo" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1976D2;"/>
+                        <Separator style="-fx-padding: 0;"/>
+                        <ListView fx:id="liveBidStream" VBox.vgrow="ALWAYS"
+                                  style="-fx-background-color: transparent; -fx-control-inner-background: white; -fx-border-color: transparent;"/>
+                    </VBox>
                 </VBox>
 
             </HBox>

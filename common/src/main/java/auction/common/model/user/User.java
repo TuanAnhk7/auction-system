@@ -1,5 +1,7 @@
 package auction.common.model.user;
 
+import auction.common.model.network.Role;
+
 import java.time.Instant;
 import java.util.Objects;
 import java.util.UUID;

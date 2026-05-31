@@ -7,10 +7,10 @@ import jakarta.persistence.Query;
 import java.util.List;
 import java.util.Optional;
 
-public class AuctionRepository {
+public class AuctionRepositoryImpl {
     private final EntityManagerFactory emf;
 
-    public AuctionRepository(EntityManagerFactory emf) {
+    public AuctionRepositoryImpl(EntityManagerFactory emf) {
         this.emf = emf;
     }
 

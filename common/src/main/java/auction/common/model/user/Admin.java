@@ -1,6 +1,8 @@
 package auction.common.model.user;
 
 import auction.common.model.item.Item;
+import auction.common.model.network.Role;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;

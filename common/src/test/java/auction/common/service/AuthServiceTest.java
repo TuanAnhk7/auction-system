@@ -2,8 +2,8 @@ package auction.common.service;
 
 import auction.common.exception.AuthenticationException;
 import auction.common.exception.UsernameAlreadyExistsException;
+import auction.common.model.network.Role;
 import auction.common.model.user.Bidder;
-import auction.common.model.user.Role;
 import auction.common.model.user.User;
 import auction.common.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;

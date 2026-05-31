@@ -3,8 +3,10 @@ package auction.client.controllers;
 import auction.client.ClientSession;
 import auction.client.network.AuctionClient;
 import auction.client.network.Observer;
+import auction.client.view.AuctionHistoryChart;
 import auction.common.exception.InvalidBidException;
 import auction.common.model.network.*;
+import auction.common.model.user.Bidder;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Platform;
@@ -22,7 +24,10 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import javafx.scene.layout.VBox;
 
 public class LiveAuctionController implements Observer {
     @FXML private Label lblBalance;
@@ -40,30 +45,64 @@ public class LiveAuctionController implements Observer {
     @FXML private TextField txtIncrement;
     @FXML private Button btnRegisterAutoBid;
     @FXML private ListView<String> liveBidStream;
+    @FXML private VBox chartContainer;
 
     private AuctionView auctionView;
     private Timeline countdownTimeline;
     private String previousStatus;
     private boolean endPopupShown;
     private boolean finalResultAddedToStream;
+    private AuctionHistoryChart chart;
+    private List<Bidder.Bid> bids = new ArrayList<>();
+
+    public void setAuctionHistoryChart(AuctionHistoryChart chart) {
+        this.chart = chart;
+    }
+
+    public void onNewBid(Bidder.Bid bid) {
+        bids.add(bid);
+        if (chart != null) {
+            chart.updateChart(bids);
+        }
+    }
 
     @FXML
     public void initialize() {
+        System.out.println("LIVE AUCTION INITIALIZE RUNNING");
+        System.out.println("chartContainer = " + chartContainer);
+
         AuctionClient.getInstance().addObserver(this);
-        configureLiveBidStream();
-        updateBalanceDisplay();
+
+        chart = new AuctionHistoryChart();
+
+        chart.setStyle("-fx-border-color:red;");
+        chart.setPrefHeight(250);
+
+        chartContainer.getChildren().add(chart);
+
+        System.out.println("chartContainer children = "
+                + chartContainer.getChildren().size());
+
     }
 
     public void setAuctionView(AuctionView auctionView) {
         this.auctionView = auctionView;
         this.previousStatus = auctionView.getStatus();
         this.finalResultAddedToStream = false;
+        bids = convertHistoryToBids(
+                auctionView.getBidHistory()
+        );
+
+        chart.updateChart(bids);
         refreshView();
         updateBalanceDisplay();
         startCountdown();
     }
 
-        public void cleanup() {
+    private void loadBidHistoryToChart() {
+    }
+
+    public void cleanup() {
         if (countdownTimeline != null) {
             countdownTimeline.stop();
         }
@@ -177,6 +216,11 @@ public class LiveAuctionController implements Observer {
                     && auctionView != null
                     && auctionView.getAuctionId().equals(response.getUpdatedAuction().getAuctionId())) {
                 this.auctionView = response.getUpdatedAuction();
+                bids = convertHistoryToBids(
+                        auctionView.getBidHistory()
+                );
+
+                chart.updateChart(bids);
                 refreshView();
                 checkStatusTransition();
             }
@@ -365,5 +409,34 @@ public class LiveAuctionController implements Observer {
         if (finalResultAddedToStream) return;
         finalResultAddedToStream = true;
         liveBidStream.getItems().add(0, "[" + LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss")) + "] Phiên đấu giá đã bị hủy bởi quản trị viên.");
+    }
+
+    private List<Bidder.Bid> convertHistoryToBids(List<String> history) {
+        List<Bidder.Bid> result = new ArrayList<>();
+        for (String line : history) {
+            try {
+                int close = line.indexOf("]");
+                String timePart = line.substring(1, close);
+                String remain = line.substring(close + 1).trim();
+                String username = remain.split(" đặt ")[0];
+                String priceText =
+                        remain.split(" đặt ")[1]
+                                .replace(" USD", "")
+                                .trim();
+                double amount = Double.parseDouble(priceText);
+                LocalDateTime time =
+                        LocalDateTime.parse(timePart.replace("Z", ""));
+                result.add(
+                        new Bidder.Bid(
+                                username,
+                                amount,
+                                time
+                        )
+                );
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return result;
     }
 }

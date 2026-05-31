@@ -6,10 +6,10 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Query;
 import java.util.List;
 
-public class UserRepository {
+public class UserRepositoryImpl {
     private final EntityManagerFactory emf;
 
-    public UserRepository(EntityManagerFactory emf) {
+    public UserRepositoryImpl(EntityManagerFactory emf) {
         this.emf = emf;
     }
 

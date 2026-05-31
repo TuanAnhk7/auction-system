@@ -18,8 +18,11 @@ Dự án này là Bài tập lớn môn Lập trình nâng cao, hỗ trợ nhi�
 * **Xử lý Đa luồng (Concurrency):** Server phục vụ hàng trăm Client kết nối đồng thời nhờ cơ chế Multi-threading, đảm bảo không bị nghẽn mạng hay khóa giao diện.
 * **Kiểm soát tính hợp lệ:** Xử lý ngoại lệ chặt chẽ, từ chối các mức giá thấp hơn giá hiện tại hoặc các thao tác khi phiên đấu giá đã kết thúc.
 
+**Chức năng Nâng cao**
+* **Auto-Bidding (Đấu giá tự động):** Cho phép người chơi thiết lập mức giá tối đa (maxBid) và bước giá nhảy (increment). Server tự động sử dụng cấu trúc dữ liệu `PriorityQueue` để thay mặt người chơi trả giá một cách tối ưu.
+* **Anti-sniping (Chống "cướp" giờ chót):** Tự động gia hạn thêm thời gian cho phiên đấu giá nếu phát hiện có lệnh đặt giá mới được gửi lên ở những giây cuối cùng của phiên.
+* **Bid History Visualization:** Tích hợp JavaFX Line Chart để vẽ biểu đồ đường, trực quan hóa biến động của lịch sử trả giá theo thời gian thực (Realtime).
 ---
-
 ## 🛠 Công nghệ sử dụng
 * **Ngôn ngữ:** Java (JDK 17+)
 * **Giao diện:** JavaFX & SceneBuilder (Mô hình MVC)
@@ -70,3 +73,8 @@ Sau khi sử dụng Maven Lifecycle để biên dịch toàn bộ dự án (ch�
 1. Mở file `auction.client.MainClient.java` (hoặc chạy lệnh `javafx:run` qua Maven).
 2. Khởi chạy để mở giao diện người dùng.
 3. *Mẹo:* Có thể chạy bước 2 nhiều lần liên tục để mở ra nhiều cửa sổ Client khác nhau, phục vụ việc test tính năng nhiều người cùng đấu giá một sản phẩm.
+---
+## 🔗 Tài liệu nội bộ và Đính kèm
+
+* **Báo cáo đồ án (PDF):** [Nhấn vào đây để xem báo cáo]
+* **Video Demo thực tế:** [https://drive.google.com/drive/folders/1VWqFvQM5_4eYNkb8dcSgFLgyrllXtNGO?usp=drive_link]

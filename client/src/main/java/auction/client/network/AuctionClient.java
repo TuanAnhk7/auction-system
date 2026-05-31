@@ -61,6 +61,10 @@ public final class AuctionClient {
         send(request);
     }
 
+    public synchronized void sendBalanceUpdateRequest(BalanceUpdateRequest request) throws IOException {
+        send(request);
+    }
+
     public synchronized void sendLoginRequest(LoginRequest request) throws IOException {
         send(request);
     }
@@ -95,22 +99,46 @@ public final class AuctionClient {
 
     public synchronized void close() {
         try {
+            if (in != null) {
+                in.close();
+            }
+        } catch (IOException ignored) {
+        }
+
+        try {
+            if (out != null) {
+                out.close();
+            }
+        } catch (IOException ignored) {
+        }
+
+        try {
             if (socket != null) {
                 socket.close();
             }
         } catch (IOException ignored) {
         }
+
+        socket = null;
+        out = null;
+        in = null;
     }
 
     private void startListener() {
+        final Socket listenerSocket = socket;
+        final ObjectInputStream listenerIn = in;
         listenerThread = new Thread(() -> {
             try {
-                while (socket != null && !socket.isClosed()) {
-                    Object incoming = in.readObject();
+                while (listenerSocket != null && !listenerSocket.isClosed()) {
+                    Object incoming = listenerIn.readObject();
                     if (incoming instanceof BidResponse response) {
                         notifyBidObservers(response);
                     } else if (incoming instanceof AutoBidResponse response) {
                         notifyAutoBidObservers(response);
+                    } else if (incoming instanceof AuctionExtendedResponse response) {
+                        notifyAuctionExtendedObservers(response);
+                    } else if (incoming instanceof BalanceUpdateResponse response) {
+                        notifyBalanceUpdateObservers(response);
                     } else if (incoming instanceof LoginResponse response) {
                         notifyLoginObservers(response);
                     } else if (incoming instanceof RegisterResponse response) {
@@ -139,6 +167,14 @@ public final class AuctionClient {
 
     private void notifyAutoBidObservers(AutoBidResponse response) {
         for (Observer observer : observers) observer.onAutoBidResponse(response);
+    }
+
+    private void notifyAuctionExtendedObservers(AuctionExtendedResponse response) {
+        for (Observer observer : observers) observer.onAuctionExtendedResponse(response);
+    }
+
+    private void notifyBalanceUpdateObservers(BalanceUpdateResponse response) {
+        for (Observer observer : observers) observer.onBalanceUpdateResponse(response);
     }
 
     private void notifyAuctionListObservers(GetAuctionListResponse response) {

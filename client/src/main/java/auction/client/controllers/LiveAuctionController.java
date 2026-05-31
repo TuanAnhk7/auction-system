@@ -168,20 +168,59 @@ public class LiveAuctionController implements Observer {
     public void onBidResponse(BidResponse response) {
         if (response == null) return;
         Platform.runLater(() -> {
-            if (response.isSuccess() && response.getUpdatedAuction() != null) {
-                this.auctionView = response.getUpdatedAuction();
+            if (!response.isSuccess()) {
+                showError(response.getMessage());
+                return;
             }
-            if (response.getBidderUsername().equals(ClientSession.getUsername())) {
+
+            if (response.isSuccess() && response.getUpdatedAuction() != null
+                    && auctionView != null
+                    && auctionView.getAuctionId().equals(response.getUpdatedAuction().getAuctionId())) {
+                this.auctionView = response.getUpdatedAuction();
+                refreshView();
+                checkStatusTransition();
+            }
+            if (response.getBidderUsername() != null
+                    && response.getBidderUsername().equals(ClientSession.getUsername())) {
                 ClientSession.setBalance(response.getBalance());
                 updateBalanceDisplay();
             }
-            refreshView();
-            checkStatusTransition();
-            checkStatusTransition();
-            if (response.getMessage() != null && !response.getMessage().isEmpty()) {
+            if (response.getMessage() != null && !response.getMessage().isEmpty()
+                    && auctionView != null
+                    && response.getUpdatedAuction() != null
+                    && auctionView.getAuctionId().equals(response.getUpdatedAuction().getAuctionId())) {
                 String time = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
                 liveBidStream.getItems().add(0, "[" + time + "] " + response.getMessage());
             }
+        });
+    }
+
+    @Override
+    public void onAuctionExtendedResponse(AuctionExtendedResponse response) {
+        if (response == null || !response.isSuccess() || response.getUpdatedAuction() == null || auctionView == null) {
+            return;
+        }
+
+        if (!auctionView.getAuctionId().equals(response.getAuctionId())) {
+            return;
+        }
+
+        Platform.runLater(() -> {
+            this.auctionView = response.getUpdatedAuction();
+            refreshView();
+            updateCountdown();
+        });
+    }
+
+    @Override
+    public void onBalanceUpdateResponse(BalanceUpdateResponse response) {
+        if (response == null || !response.isSuccess()) {
+            return;
+        }
+
+        Platform.runLater(() -> {
+            ClientSession.setBalance(response.getBalance());
+            updateBalanceDisplay();
         });
     }
 
@@ -217,6 +256,31 @@ public class LiveAuctionController implements Observer {
         }
     }
 
+    private void updateCountdown() {
+        if (auctionView == null || lblCountdown == null) {
+            return;
+        }
+
+        if (!"RUNNING".equalsIgnoreCase(auctionView.getStatus())) {
+            lblCountdown.setText("00:00:00");
+            return;
+        }
+
+        long secondsLeft = ChronoUnit.SECONDS.between(LocalDateTime.now(), auctionView.getEndTime());
+        if (secondsLeft <= 0) {
+            lblCountdown.setText("Thời gian đã hết!");
+            if (countdownTimeline != null) {
+                countdownTimeline.stop();
+            }
+            return;
+        }
+
+        long hours = secondsLeft / 3600;
+        long minutes = (secondsLeft % 3600) / 60;
+        long seconds = secondsLeft % 60;
+        lblCountdown.setText(String.format("%02d:%02d:%02d", hours, minutes, seconds));
+    }
+
     private void checkStatusTransition() {
         String currentStatus = auctionView.getStatus();
         if ("FINISHED".equalsIgnoreCase(currentStatus) && !"FINISHED".equalsIgnoreCase(previousStatus)) {
@@ -234,22 +298,7 @@ public class LiveAuctionController implements Observer {
 
     private void startCountdown() {
         if (countdownTimeline != null) countdownTimeline.stop();
-        countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> {
-            if (auctionView == null || !"RUNNING".equalsIgnoreCase(auctionView.getStatus())) {
-                lblCountdown.setText("00:00:00");
-                return;
-            }
-            long secondsLeft = ChronoUnit.SECONDS.between(LocalDateTime.now(), auctionView.getEndTime());
-            if (secondsLeft <= 0) {
-                lblCountdown.setText("Thời gian đã hết!");
-                countdownTimeline.stop();
-            } else {
-                long hours = secondsLeft / 3600;
-                long minutes = (secondsLeft % 3600) / 60;
-                long secs = secondsLeft % 60;
-                lblCountdown.setText(String.format("%02d:%02d:%02d", hours, minutes, secs));
-            }
-        }));
+        countdownTimeline = new Timeline(new KeyFrame(Duration.seconds(1), event -> updateCountdown()));
         countdownTimeline.setCycleCount(Timeline.INDEFINITE);
         countdownTimeline.play();
     }

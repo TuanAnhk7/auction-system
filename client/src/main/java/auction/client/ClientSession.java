@@ -33,4 +33,10 @@ public final class ClientSession {
     public static void setBalance(double balance) {
         ClientSession.balance = balance;
     }
+
+    public static void reset() {
+        username = "guest";
+        role = Role.BIDDER;
+        balance = 0.0;
+    }
 }

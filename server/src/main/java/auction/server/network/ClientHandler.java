@@ -18,6 +18,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class ClientHandler implements Runnable {
     private final Socket socket;
@@ -50,6 +51,8 @@ public class ClientHandler implements Runnable {
                     handleBidRequest(request);
                 } else if (receivedData instanceof AutoBidRequest request) {
                     handleAutoBidRequest(request);
+                } else if (receivedData instanceof BalanceUpdateRequest request) {
+                    handleBalanceUpdateRequest(request);
                 } else if (receivedData instanceof AdminAuctionActionRequest request) {
                     handleAdminAuctionActionRequest(request);
                 } else if (receivedData instanceof CreateAuctionRequest request) {
@@ -129,10 +132,16 @@ public class ClientHandler implements Runnable {
         try {
             ensureAuthenticated();
             UserAccount user = authenticatedUser;
+            Auction auction = auctionManager.findById(request.getAuctionId())
+                    .orElseThrow(() -> new InvalidBidException("Không tìm thấy phiên đấu giá."));
+            LocalDateTime previousEndTime = auction.getEndTime();
+
             auctionManager.placeBid(request.getAuctionId(), user.getUsername(), request.getBidAmount());
             refreshAuthenticatedUserBalance();
             Auction updatedAuction = auctionManager.findById(request.getAuctionId())
                     .orElseThrow(() -> new InvalidBidException("Không tìm thấy phiên đấu giá sau khi cập nhật."));
+
+            broadcastAuctionExtensionIfNeeded(updatedAuction, previousEndTime);
 
             server.broadcast(new BidResponse(
                     true,
@@ -153,24 +162,84 @@ public class ClientHandler implements Runnable {
         try {
             ensureAuthenticated();
             UserAccount user = authenticatedUser;
+            Auction auction = auctionManager.findById(request.getAuctionId())
+                    .orElseThrow(() -> new InvalidBidException("Không tìm thấy phiên đấu giá."));
+            LocalDateTime previousEndTime = auction.getEndTime();
+            double previousHighestBid = auction.getCurrentHighestBid();
+
             auctionManager.registerAutoBid(request.getAuctionId(), user.getUsername(), request.getMaxBid(), request.getIncrement());
-            
+
             Auction updatedAuction = auctionManager.findById(request.getAuctionId())
                     .orElseThrow(() -> new InvalidBidException("Không tìm thấy phiên đấu giá."));
 
             send(new AutoBidResponse(true, "Đăng ký tự động thầu thành công."));
-            server.broadcast(new BidResponse(
-                    true,
-                    String.format("%s đã đặt giá tự động %.2f USD", user.getUsername(), updatedAuction.getCurrentHighestBid()),
-                    toAuctionView(updatedAuction),
-                    "Hệ thống"
-            ));
+            broadcastAuctionExtensionIfNeeded(updatedAuction, previousEndTime);
+            if (Double.compare(updatedAuction.getCurrentHighestBid(), previousHighestBid) != 0) {
+                server.broadcast(new BidResponse(
+                        true,
+                        String.format("%s đã đặt giá tự động %.2f USD", user.getUsername(), updatedAuction.getCurrentHighestBid()),
+                        toAuctionView(updatedAuction),
+                        "Hệ thống"
+                ));
+            }
         } catch (AuctionException e) {
             send(new AutoBidResponse(false, e.getMessage()));
         } catch (Exception e) {
             send(new AutoBidResponse(false, "Lỗi hệ thống khi đăng ký tự động thầu: " + e.getMessage()));
             e.printStackTrace();
         }
+    }
+
+    private void handleBalanceUpdateRequest(BalanceUpdateRequest request) {
+        try {
+            ensureAuthenticated();
+            if (request.getAmount() <= 0) {
+                throw new AuctionException("Số tiền nạp phải lớn hơn 0.");
+            }
+
+            userManager.updateAccountBalance(authenticatedUser.getUsername(), request.getAmount());
+            refreshAuthenticatedUserBalance();
+            send(new BalanceUpdateResponse(
+                    true,
+                    String.format("Đã nạp thêm %.2f USD vào tài khoản.", request.getAmount()),
+                    authenticatedUser.getAccountBalance()
+            ));
+        } catch (AuctionException e) {
+            send(new BalanceUpdateResponse(
+                    false,
+                    e.getMessage(),
+                    authenticatedUser != null ? authenticatedUser.getAccountBalance() : 0.0
+            ));
+        } catch (Exception e) {
+            send(new BalanceUpdateResponse(
+                    false,
+                    "Lỗi hệ thống khi nạp tiền: " + e.getMessage(),
+                    authenticatedUser != null ? authenticatedUser.getAccountBalance() : 0.0
+            ));
+            e.printStackTrace();
+        }
+    }
+
+    private void broadcastAuctionExtensionIfNeeded(Auction updatedAuction, LocalDateTime previousEndTime) {
+        if (updatedAuction == null || previousEndTime == null) {
+            return;
+        }
+
+        LocalDateTime newEndTime = updatedAuction.getEndTime();
+        if (newEndTime == null || !newEndTime.isAfter(previousEndTime)) {
+            return;
+        }
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        server.broadcast(new AuctionExtendedResponse(
+                true,
+                String.format("Phiên đấu giá '%s' đã được gia hạn đến %s.",
+                        updatedAuction.getItem().getName(),
+                        newEndTime.format(formatter)),
+                updatedAuction.getId(),
+                newEndTime,
+                toAuctionView(updatedAuction)
+        ));
     }
 
     private void handleAuctionListRequest() {

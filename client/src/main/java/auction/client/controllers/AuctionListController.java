@@ -1,10 +1,13 @@
 package auction.client.controllers;
 
 import auction.client.ClientSession;
+import auction.client.MainClient;
 import auction.client.network.AuctionClient;
 import auction.client.network.Observer;
 import auction.common.exception.InvalidBidException;
 import auction.common.model.network.AuctionView;
+import auction.common.model.network.AuctionExtendedResponse;
+import auction.common.model.network.BalanceUpdateResponse;
 import auction.common.model.network.BidRequest;
 import auction.common.model.network.BidResponse;
 import auction.common.model.network.GetAuctionListResponse;
@@ -78,6 +81,7 @@ public class AuctionListController implements Observer {
     private final Timeline refreshTimeline = new Timeline(
             new KeyFrame(Duration.seconds(1), event -> auctionTable.refresh())
     );
+    private Stage profileStage;
     // Dữ liệu gốc lấy từ server. Search/filter/sort luôn chạy trên danh sách này
     // để tránh mất dữ liệu khi người dùng đổi điều kiện hiển thị.
     private final ObservableList<AuctionView> masterAuctionList = FXCollections.observableArrayList();
@@ -128,6 +132,50 @@ public class AuctionListController implements Observer {
         updateBalanceDisplay();
     }
 
+    @FXML
+    private void handleOpenProfile() {
+        try {
+            if (profileStage != null && profileStage.isShowing()) {
+                profileStage.toFront();
+                profileStage.requestFocus();
+                return;
+            }
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/auction/client/views/profile-popup-view.fxml"));
+            Parent root = loader.load();
+            ProfilePopupController controller = loader.getController();
+            controller.setProfile(ClientSession.getUsername(), ClientSession.getBalance());
+
+            Stage owner = (Stage) balanceLabel.getScene().getWindow();
+            profileStage = new Stage();
+            profileStage.initOwner(owner);
+            profileStage.initModality(Modality.WINDOW_MODAL);
+            profileStage.setResizable(false);
+            profileStage.setTitle("Thông tin cá nhân");
+            profileStage.setScene(new Scene(root));
+            profileStage.setOnHidden(event -> {
+                controller.cleanup();
+                profileStage = null;
+            });
+            profileStage.show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            showError("Không mở được cửa sổ thông tin cá nhân: " + e.getMessage());
+        }
+    }
+
+    @FXML
+    private void handleLogout() {
+        cleanup();
+        ClientSession.reset();
+        AuctionClient.getInstance().close();
+        try {
+            MainClient.changeScene("login-view.fxml");
+        } catch (IOException e) {
+            showError("Không thể đăng xuất: " + e.getMessage());
+        }
+    }
+
     private void configureSearchAndFilter() {
         statusFilterComboBox.setItems(FXCollections.observableArrayList(
                 FILTER_ALL,
@@ -167,6 +215,15 @@ public class AuctionListController implements Observer {
     private void updateBalanceDisplay() {
         if (balanceLabel != null) {
             balanceLabel.setText(String.format(Locale.US, "Số dư: %.2f USD", ClientSession.getBalance()));
+        }
+    }
+
+    private void cleanup() {
+        refreshTimeline.stop();
+        AuctionClient.getInstance().removeObserver(this);
+        if (profileStage != null) {
+            profileStage.close();
+            profileStage = null;
         }
     }
 
@@ -235,7 +292,7 @@ public class AuctionListController implements Observer {
             double bidAmount = Double.parseDouble(bidAmountField.getText().trim());
             validateBid(selectedAuction, bidAmount);
             BidRequest request = new BidRequest(
-                    selectedAuction.getItemId(),
+                    selectedAuction.getAuctionId(),
                     ClientSession.getUsername(),
                     bidAmount
             );
@@ -314,14 +371,14 @@ public class AuctionListController implements Observer {
             // Realtime update phải cập nhật vào danh sách gốc trước, sau đó filter/sort mới giữ được trạng thái hiện tại.
             for (int i = 0; i < masterAuctionList.size(); i++) {
                 AuctionView current = masterAuctionList.get(i);
-                if (current.getItemId().equals(updatedAuction.getItemId())) {
+                if (current.getAuctionId().equals(updatedAuction.getAuctionId())) {
                     masterAuctionList.set(i, updatedAuction);
                     break;
                 }
             }
 
             AuctionView selected = auctionTable.getSelectionModel().getSelectedItem();
-            if (selected != null && selected.getItemId().equals(updatedAuction.getItemId())) {
+            if (selected != null && selected.getAuctionId().equals(updatedAuction.getAuctionId())) {
                 updateDetailView(updatedAuction);
             }
 
@@ -335,12 +392,50 @@ public class AuctionListController implements Observer {
     }
 
     @Override
+    public void onAuctionExtendedResponse(AuctionExtendedResponse response) {
+        if (response == null || !response.isSuccess() || response.getUpdatedAuction() == null) {
+            return;
+        }
+
+        Platform.runLater(() -> {
+            AuctionView updatedAuction = response.getUpdatedAuction();
+
+            for (int i = 0; i < masterAuctionList.size(); i++) {
+                AuctionView current = masterAuctionList.get(i);
+                if (current.getAuctionId().equals(updatedAuction.getAuctionId())) {
+                    masterAuctionList.set(i, updatedAuction);
+                    break;
+                }
+            }
+
+            AuctionView selected = auctionTable.getSelectionModel().getSelectedItem();
+            if (selected != null && selected.getAuctionId().equals(updatedAuction.getAuctionId())) {
+                updateDetailView(updatedAuction);
+            }
+
+            auctionTable.refresh();
+        });
+    }
+
+    @Override
     public void onAuctionListResponse(GetAuctionListResponse response) {
         Platform.runLater(() -> {
             // Khi server trả danh sách mới, thay toàn bộ dữ liệu gốc rồi áp lại filter hiện tại.
             masterAuctionList.setAll(response.getAuctions());
             applyFilters();
             auctionTable.refresh();
+        });
+    }
+
+    @Override
+    public void onBalanceUpdateResponse(BalanceUpdateResponse response) {
+        if (response == null || !response.isSuccess()) {
+            return;
+        }
+
+        Platform.runLater(() -> {
+            ClientSession.setBalance(response.getBalance());
+            updateBalanceDisplay();
         });
     }
 

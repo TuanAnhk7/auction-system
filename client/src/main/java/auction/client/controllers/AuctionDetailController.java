@@ -3,6 +3,7 @@ package auction.client.controllers;
 import auction.client.network.AuctionClient;
 import auction.client.network.Observer;
 import auction.common.model.network.AdminAuctionActionResponse;
+import auction.common.model.network.AuctionExtendedResponse;
 import auction.common.model.network.AuctionView;
 import auction.common.model.network.BidResponse;
 import auction.common.model.network.CreateAuctionResponse;
@@ -80,7 +81,7 @@ public class AuctionDetailController implements Observer {
                 return;
             }
             AuctionView updatedAuction = response.getUpdatedAuction();
-            if (!auctionView.getItemId().equals(updatedAuction.getItemId())) {
+            if (!auctionView.getAuctionId().equals(updatedAuction.getAuctionId())) {
                 return;
             }
             handleStatusTransition(auctionView, updatedAuction);
@@ -92,7 +93,7 @@ public class AuctionDetailController implements Observer {
     @Override
     public void onAuctionListResponse(GetAuctionListResponse response) {
         Platform.runLater(() -> response.getAuctions().stream()
-                .filter(auction -> auctionView != null && auctionView.getItemId().equals(auction.getItemId()))
+                .filter(auction -> auctionView != null && auctionView.getAuctionId().equals(auction.getAuctionId()))
                 .findFirst()
                 .ifPresent(updatedAuction -> {
                     handleStatusTransition(auctionView, updatedAuction);
@@ -108,13 +109,29 @@ public class AuctionDetailController implements Observer {
     @Override
     public void onAdminAuctionActionResponse(AdminAuctionActionResponse response) {
         if (response.isSuccess() && response.getUpdatedAuction() != null && auctionView != null
-                && auctionView.getItemId().equals(response.getUpdatedAuction().getItemId())) {
+                && auctionView.getAuctionId().equals(response.getUpdatedAuction().getAuctionId())) {
             Platform.runLater(() -> {
                 handleStatusTransition(auctionView, response.getUpdatedAuction());
                 auctionView = response.getUpdatedAuction();
                 refreshView();
             });
         }
+    }
+
+    @Override
+    public void onAuctionExtendedResponse(AuctionExtendedResponse response) {
+        if (response == null || !response.isSuccess() || response.getUpdatedAuction() == null || auctionView == null) {
+            return;
+        }
+
+        if (!auctionView.getAuctionId().equals(response.getAuctionId())) {
+            return;
+        }
+
+        Platform.runLater(() -> {
+            auctionView = response.getUpdatedAuction();
+            refreshView();
+        });
     }
 
     private void refreshView() {

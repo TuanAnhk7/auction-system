@@ -172,10 +172,11 @@ public class AuctionManager {
         return placeBid(auction.getId(), bidderUsername, bidAmount);
     }
 
-    public synchronized void registerAutoBid(String itemId, String bidderUsername, double maxBid, double increment)
+    public synchronized void registerAutoBid(String auctionIdOrItemId, String bidderUsername, double maxBid, double increment)
             throws AuctionClosedException, InvalidBidException {
-        Auction auction = findByItemId(itemId)
-                .orElseThrow(() -> new InvalidBidException("Item not found."));
+        Auction auction = findById(auctionIdOrItemId)
+                .or(() -> findByItemId(auctionIdOrItemId))
+                .orElseThrow(() -> new InvalidBidException("Auction or item not found."));
         
         UserAccount bidderAccount = userManager.findByUsername(bidderUsername);
         if (bidderAccount == null) throw new InvalidBidException("Account not found.");

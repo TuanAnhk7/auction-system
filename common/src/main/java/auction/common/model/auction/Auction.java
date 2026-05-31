@@ -9,12 +9,18 @@ import auction.common.model.user.Bidder;
 
 import java.time.LocalDateTime;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.PriorityQueue;
 
 public class Auction extends BaseEntity {
+    private static final long EXTENSION_THRESHOLD_SECONDS =
+            Long.getLong("auction.extension.thresholdSeconds", 30L);
+    private static final long EXTENSION_DURATION_MINUTES =
+            Long.getLong("auction.extension.durationMinutes", 2L);
+
     private final Item item;
     private final String sellerUsername;
     private LocalDateTime startTime;
@@ -66,6 +72,7 @@ public class Auction extends BaseEntity {
 
     public synchronized List<BidTransaction> placeBid(Bidder bidder, double bidAmount)
             throws AuctionClosedException, InvalidBidException {
+        LocalDateTime bidReceivedAt = LocalDateTime.now();
         updateStatusIfExpired();
         if (status == AuctionStatus.FINISHED) {
             throw new AuctionClosedException("Auction has finished.");
@@ -83,6 +90,7 @@ public class Auction extends BaseEntity {
         List<BidTransaction> newTransactions = new ArrayList<>();
         newTransactions.add(executeBid(bidder, bidAmount));
         newTransactions.addAll(processAutoBids());
+        extendEndTimeIfNeeded(bidReceivedAt);
         return newTransactions;
     }
 
@@ -98,13 +106,18 @@ public class Auction extends BaseEntity {
     }
 
     public synchronized List<BidTransaction> registerAutoBid(Bidder bidder, double maxBid, double increment) throws InvalidBidException {
+        LocalDateTime requestTime = LocalDateTime.now();
         if (maxBid <= currentHighestBid) {
             throw new InvalidBidException("Max bid must be higher than current price.");
         }
         AutoBid autoBid = new AutoBid(bidder, maxBid, increment);
         autoBids.remove(autoBid);
         autoBids.add(autoBid);
-        return processAutoBids();
+        List<BidTransaction> transactions = processAutoBids();
+        if (!transactions.isEmpty()) {
+            extendEndTimeIfNeeded(requestTime);
+        }
+        return transactions;
     }
 
     private List<BidTransaction> processAutoBids() {
@@ -137,13 +150,17 @@ public class Auction extends BaseEntity {
     }
 
     public synchronized void startAuction() throws AuctionException {
+        LocalDateTime actionTime = LocalDateTime.now();
         if (status != AuctionStatus.OPEN && status != AuctionStatus.PENDING) {
             throw new AuctionException("Auction can only start from OPEN or PENDING status.");
         }
         this.startTime = LocalDateTime.now();
         this.status = AuctionStatus.RUNNING;
         touch();
-        processAutoBids();
+        List<BidTransaction> transactions = processAutoBids();
+        if (!transactions.isEmpty()) {
+            extendEndTimeIfNeeded(actionTime);
+        }
     }
 
     public synchronized void finishAuction() throws AuctionException {
@@ -199,6 +216,25 @@ public class Auction extends BaseEntity {
     public synchronized boolean canAcceptBids() {
         updateStatusIfExpired();
         return status == AuctionStatus.RUNNING;
+    }
+
+    public synchronized boolean extendEndTimeIfNeeded() {
+        return extendEndTimeIfNeeded(LocalDateTime.now());
+    }
+
+    public synchronized boolean extendEndTimeIfNeeded(LocalDateTime referenceTime) {
+        if (status != AuctionStatus.RUNNING || endTime == null) {
+            return false;
+        }
+
+        long secondsLeft = ChronoUnit.SECONDS.between(referenceTime, endTime);
+        if (secondsLeft <= 0 || secondsLeft > EXTENSION_THRESHOLD_SECONDS) {
+            return false;
+        }
+
+        endTime = endTime.plusMinutes(EXTENSION_DURATION_MINUTES);
+        touch();
+        return true;
     }
 
     public Item getItem() { return item; }

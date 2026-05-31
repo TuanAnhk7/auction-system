@@ -67,6 +67,6 @@ Sau khi sử dụng Maven Lifecycle để biên dịch toàn bộ dự án (ch�
 3. Kiểm tra Console báo thành công: `Server đang chạy và lắng nghe trên port 8080...`
 
 **Bước 2: Khởi động Client (Giao diện người chơi)**
-1. Mở file `auction.client.Launcher.java` (hoặc chạy lệnh `javafx:run` qua Maven).
+1. Mở file `auction.client.MainClient.java` (hoặc chạy lệnh `javafx:run` qua Maven).
 2. Khởi chạy để mở giao diện người dùng.
 3. *Mẹo:* Có thể chạy bước 2 nhiều lần liên tục để mở ra nhiều cửa sổ Client khác nhau, phục vụ việc test tính năng nhiều người cùng đấu giá một sản phẩm.

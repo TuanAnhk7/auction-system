@@ -1,7 +1,9 @@
 package auction.client.network;
 
 import auction.common.model.network.AdminAuctionActionResponse;
+import auction.common.model.network.AuctionExtendedResponse;
 import auction.common.model.network.BidResponse;
+import auction.common.model.network.BalanceUpdateResponse;
 import auction.common.model.network.CreateAuctionResponse;
 import auction.common.model.network.GetAuctionListResponse;
 import auction.common.model.network.LoginResponse;
@@ -30,5 +32,11 @@ public interface Observer {
     }
 
     default void onAutoBidResponse(AutoBidResponse response) {
+    }
+
+    default void onBalanceUpdateResponse(BalanceUpdateResponse response) {
+    }
+
+    default void onAuctionExtendedResponse(AuctionExtendedResponse response) {
     }
 }

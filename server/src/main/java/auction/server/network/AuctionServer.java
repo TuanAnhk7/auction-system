@@ -6,6 +6,7 @@ import auction.common.model.auction.AuctionManager;
 import auction.common.model.auction.BidTransaction;
 import auction.common.model.item.Art;
 import auction.common.model.item.Item;
+import auction.common.model.network.AuctionExtendedResponse;
 import auction.common.model.network.AuctionView;
 import auction.common.model.network.BidResponse;
 import auction.common.model.network.GetAuctionListResponse;
@@ -57,6 +58,12 @@ public class AuctionServer {
     }
 
     public void broadcast(BidResponse response) {
+        for (ClientHandler client : clients) {
+            client.send(response);
+        }
+    }
+
+    public void broadcast(AuctionExtendedResponse response) {
         for (ClientHandler client : clients) {
             client.send(response);
         }

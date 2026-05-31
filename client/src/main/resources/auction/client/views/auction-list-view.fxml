@@ -6,9 +6,19 @@
 <BorderPane prefHeight="640.0" prefWidth="1120.0"
             xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1"
-            fx:controller="auction.client.controllers.AuctionListController">
+  fx:controller="auction.client.controllers.AuctionListController">
   <top>
     <VBox spacing="10.0" style="-fx-padding: 10;">
+      <MenuBar useSystemMenuBar="false">
+        <menus>
+          <Menu text="Tài khoản">
+            <items>
+              <MenuItem text="Thông tin cá nhân" onAction="#handleOpenProfile" />
+              <MenuItem text="Đăng xuất" onAction="#handleLogout" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
       <Label text="DANH SÁCH VẬT PHẨM ĐẤU GIÁ" style="-fx-font-size: 20px;" />
       <HBox spacing="10.0" alignment="CENTER_LEFT">
         <TextField fx:id="searchField" promptText="Tìm theo tên vật phẩm, người tạo, người dẫn đầu..." prefWidth="340.0" />

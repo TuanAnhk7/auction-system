@@ -37,9 +37,36 @@ Dự án tuân thủ nghiêm ngặt các nguyên lý OOP (SOLID) và áp dụng 
 4. **Factory Method:** Khởi tạo các loại vật phẩm đấu giá khác nhau (Electronics, Art, Vehicle) một cách linh hoạt.
 
 ---
+## 📂 Cấu trúc Module chính
+Dự án áp dụng mô hình Maven Multi-module, được chia thành 3 phần tách biệt:
+* **`common`**: Chứa các đối tượng dữ liệu dùng chung (User, Item, Request/Response Packets...) phục vụ cho quá trình đóng gói và truyền tải qua mạng (Serialization).
+* **`server`**: Module máy chủ không giao diện (Console-based). Đảm nhiệm việc mở Socket port 8080, quản lý danh sách người chơi (Multi-threading), xử lý logic đấu giá và phát sóng (Broadcast) giá mới đến toàn mạng.
+* **`client`**: Module khách hàng (JavaFX UI). Giao tiếp với Server để thực hiện đăng nhập, hiển thị danh sách vật phẩm và gửi lệnh đặt giá (Live Bidding).
+
+---
+
+## 📦 Vị trí các file đóng gói (.jar)
+Sau khi sử dụng Maven Lifecycle để biên dịch toàn bộ dự án (chạy lệnh `install` ở thư mục root), các file thực thi `.jar` sẽ được tự động sinh ra và lưu trữ tại các vị trí sau:
+* **Gói thư viện dùng chung:** `common/target/common-1.0-SNAPSHOT.jar`
+* **File chạy Server:** `server/target/server-1.0-SNAPSHOT.jar`
+* **File chạy Client:** `client/target/client-1.0-SNAPSHOT.jar`
+  *(Lưu ý: Tên phiên bản 1.0-SNAPSHOT có thể thay đổi tùy theo thiết lập trong file pom.xml)*
 
 ## 🚀 Hướng dẫn Cài đặt & Chạy dự án
 
 ### Yêu cầu hệ thống
 * Đã cài đặt **Java JDK 17** trở lên.
 * Đã cài đặt **Maven**.
+
+## 🚀 Hướng dẫn chạy Server/Client theo thứ tự cụ thể
+**⚠️ YÊU CẦU BẮT BUỘC:** Hệ thống hoạt động theo mô hình tập trung, do đó phải khởi động Server trước để mở cổng mạng, sau đó mới được phép chạy Client.
+
+**Bước 1: Khởi động Server (Máy chủ)**
+1. Mở file `auction.server.network.AuctionServer.java`.
+2. Khởi chạy hàm `main()`.
+3. Kiểm tra Console báo thành công: `Server đang chạy và lắng nghe trên port 8080...`
+
+**Bước 2: Khởi động Client (Giao diện người chơi)**
+1. Mở file `auction.client.Launcher.java` (hoặc chạy lệnh `javafx:run` qua Maven).
+2. Khởi chạy để mở giao diện người dùng.
+3. *Mẹo:* Có thể chạy bước 2 nhiều lần liên tục để mở ra nhiều cửa sổ Client khác nhau, phục vụ việc test tính năng nhiều người cùng đấu giá một sản phẩm.

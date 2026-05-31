@@ -2,56 +2,96 @@
 
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
 
-<BorderPane prefHeight="640.0" prefWidth="1120.0"
+<BorderPane prefHeight="720.0" prefWidth="1200.0"
+            style="-fx-background-color: linear-gradient(to bottom, #2196F3, #1976D2); -fx-padding: 15;"
             xmlns="http://javafx.com/javafx/8"
             xmlns:fx="http://javafx.com/fxml/1"
-  fx:controller="auction.client.controllers.AuctionListController">
+            fx:controller="auction.client.controllers.AuctionListController">
+
   <top>
-    <VBox spacing="10.0" style="-fx-padding: 10;">
-      <MenuBar useSystemMenuBar="false">
+    <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 15 25 20 25; -fx-background-radius: 8;">
+      <BorderPane.margin>
+        <Insets bottom="15.0" />
+      </BorderPane.margin>
+
+      <MenuBar useSystemMenuBar="false" style="-fx-background-color: transparent; -fx-padding: 0 0 10 0;">
         <menus>
-          <Menu text="Tài khoản">
+          <Menu text="⚙️ Tài khoản" style="-fx-font-weight: bold; -fx-font-size: 14px;">
             <items>
-              <MenuItem text="Thông tin cá nhân" onAction="#handleOpenProfile" />
-              <MenuItem text="Đăng xuất" onAction="#handleLogout" />
+              <MenuItem text="👤 Thông tin cá nhân" onAction="#handleOpenProfile" style="-fx-font-weight: normal; -fx-font-size: 13px;" />
+              <SeparatorMenuItem />
+              <MenuItem text="🚪 Đăng xuất" onAction="#handleLogout" style="-fx-font-weight: normal; -fx-font-size: 13px;" />
             </items>
           </Menu>
         </menus>
       </MenuBar>
-      <Label text="DANH SÁCH VẬT PHẨM ĐẤU GIÁ" style="-fx-font-size: 20px;" />
-      <HBox spacing="10.0" alignment="CENTER_LEFT">
-        <TextField fx:id="searchField" promptText="Tìm theo tên vật phẩm, người tạo, người dẫn đầu..." prefWidth="340.0" />
-        <ComboBox fx:id="statusFilterComboBox" prefWidth="150.0" promptText="Lọc trạng thái" />
-        <ComboBox fx:id="sortComboBox" prefWidth="190.0" promptText="Sắp xếp" />
+
+      <HBox alignment="CENTER_LEFT">
+        <Label text="🏛️ DANH SÁCH VẬT PHẨM ĐẤU GIÁ" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1976D2;" />
         <Region HBox.hgrow="ALWAYS" />
-        <Label fx:id="balanceLabel" text="Số dư: 0.00 USD" style="-fx-font-weight: bold; -fx-text-fill: #059669; -fx-font-size: 16px;" />
+        <Label fx:id="balanceLabel" text="💰 Số dư: 0.00 USD" style="-fx-font-weight: bold; -fx-text-fill: #FF6F00; -fx-font-size: 16px;" />
+      </HBox>
+
+      <HBox spacing="12.0" alignment="CENTER_LEFT">
+        <TextField fx:id="searchField" promptText="🔍 Tìm theo tên vật phẩm, người tạo..." prefWidth="380.0"
+                   style="-fx-padding: 10 12; -fx-background-radius: 4; -fx-border-radius: 4; -fx-border-color: #BDBDBD; -fx-background-color: white;" />
+        <ComboBox fx:id="statusFilterComboBox" prefWidth="160.0" promptText="🏷️ Lọc trạng thái"
+                  style="-fx-padding: 4 8; -fx-background-radius: 4; -fx-border-color: #BDBDBD; -fx-border-radius: 4; -fx-background-color: white;" />
+        <ComboBox fx:id="sortComboBox" prefWidth="180.0" promptText="⬇️ Sắp xếp"
+                  style="-fx-padding: 4 8; -fx-background-radius: 4; -fx-border-color: #BDBDBD; -fx-border-radius: 4; -fx-background-color: white;" />
       </HBox>
     </VBox>
   </top>
+
   <center>
-    <SplitPane dividerPositions="0.78">
+    <SplitPane dividerPositions="0.75" style="-fx-background-color: transparent; -fx-padding: 0;">
       <items>
-        <TableView fx:id="auctionTable">
-          <columns>
-            <TableColumn fx:id="nameColumn" prefWidth="220.0" text="Tên vật phẩm" />
-            <TableColumn fx:id="artistColumn" prefWidth="170.0" text="Người tạo" />
-            <TableColumn fx:id="statusColumn" prefWidth="110.0" text="Trạng thái" />
-            <TableColumn fx:id="leaderColumn" prefWidth="150.0" text="Người dẫn đầu" />
-            <TableColumn fx:id="endTimeColumn" prefWidth="170.0" text="Kết thúc lúc" />
-            <TableColumn fx:id="timeRemainingColumn" prefWidth="120.0" text="Còn lại" />
-            <TableColumn fx:id="priceColumn" prefWidth="140.0" text="Giá hiện tại" />
-          </columns>
-        </TableView>
-        <ListView fx:id="bidHistoryListView" prefWidth="220.0" />
+
+        <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 10;">
+          <TableView fx:id="auctionTable" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-control-inner-background: white; -fx-padding: 5;">
+            <columns>
+              <TableColumn fx:id="nameColumn" prefWidth="240.0" text="📦 Tên vật phẩm" />
+              <TableColumn fx:id="artistColumn" prefWidth="150.0" text="🎨 Người tạo" />
+              <TableColumn fx:id="statusColumn" prefWidth="120.0" text="📌 Trạng thái" />
+              <TableColumn fx:id="leaderColumn" prefWidth="150.0" text="👑 Người dẫn đầu" />
+              <TableColumn fx:id="endTimeColumn" prefWidth="160.0" text="⏰ Kết thúc lúc" />
+              <TableColumn fx:id="timeRemainingColumn" prefWidth="120.0" text="⏳ Còn lại" />
+              <TableColumn fx:id="priceColumn" prefWidth="140.0" text="💵 Giá hiện tại" />
+            </columns>
+          </TableView>
+        </VBox>
+
+        <VBox spacing="10" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15;">
+          <Label text="📜 Lịch sử đặt giá" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #1976D2;" />
+          <Separator style="-fx-padding: 5 0;" />
+          <ListView fx:id="bidHistoryListView" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-control-inner-background: white; -fx-border-color: transparent;" />
+        </VBox>
+
       </items>
     </SplitPane>
   </center>
+
   <bottom>
-    <HBox alignment="CENTER" spacing="20" style="-fx-padding: 15;">
-      <TextField fx:id="bidAmountField" promptText="Nhập giá đặt" prefWidth="160.0" />
-      <Button text="Đấu giá" onAction="#handleBid" />
-      <Button text="Làm mới" onAction="#handleRefresh" />
+    <HBox alignment="CENTER_RIGHT" spacing="15" style="-fx-background-color: white; -fx-padding: 15 25; -fx-background-radius: 8;">
+      <BorderPane.margin>
+        <Insets top="15.0" />
+      </BorderPane.margin>
+
+      <Region HBox.hgrow="ALWAYS" />
+
+      <Label text="Mức giá đề xuất:" style="-fx-font-size: 14px; -fx-text-fill: #757575; -fx-font-weight: bold;" />
+
+      <TextField fx:id="bidAmountField" promptText="VD: 150.00" prefWidth="180.0"
+                 style="-fx-font-size: 15px; -fx-padding: 10 15; -fx-background-radius: 4; -fx-border-radius: 4; -fx-border-color: #1976D2; -fx-border-width: 2;" />
+
+      <Button text="🚀 ĐẶT GIÁ NGAY" onAction="#handleBid"
+              style="-fx-background-color: #1976D2; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600; -fx-padding: 10 24; -fx-background-radius: 4; -fx-cursor: hand;" />
+
+      <Button text="🔄 Làm mới" onAction="#handleRefresh"
+              style="-fx-background-color: #FF6F00; -fx-text-fill: white; -fx-font-size: 14px; -fx-font-weight: 600; -fx-padding: 10 20; -fx-background-radius: 4; -fx-cursor: hand;" />
     </HBox>
   </bottom>
+
 </BorderPane>

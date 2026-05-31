@@ -1,47 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Separator?>
 <?import javafx.scene.control.TableColumn?>
 <?import javafx.scene.control.TableView?>
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="680.0" prefWidth="1180.0"
+<BorderPane prefHeight="720.0" prefWidth="1200.0"
+            style="-fx-background-color: linear-gradient(to bottom, #2196F3, #1976D2); -fx-padding: 15;"
             xmlns="http://javafx.com/javafx/17"
             xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="auction.client.controllers.AdminDashboardController">
+
     <top>
-        <VBox spacing="10.0" style="-fx-padding: 12;">
-            <Label text="TRANG QUẢN TRỊ HỆ THỐNG ĐẤU GIÁ" style="-fx-font-size: 20px;"/>
-            <HBox spacing="10.0">
-                <Button text="Làm mới danh sách" onAction="#handleRefreshAuctions"/>
-            </HBox>
-        </VBox>
+        <HBox alignment="CENTER_LEFT" style="-fx-background-color: white; -fx-padding: 15 25; -fx-background-radius: 8;">
+            <BorderPane.margin>
+                <Insets bottom="15.0"/>
+            </BorderPane.margin>
+            <Label text="⚙️ TRANG QUẢN TRỊ (ADMIN DASHBOARD)" style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #1976D2;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="🔄 Làm mới danh sách" onAction="#handleRefreshAuctions"
+                    style="-fx-background-color: #FF6F00; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 15; -fx-background-radius: 4; -fx-cursor: hand;"/>
+        </HBox>
     </top>
+
     <center>
-        <VBox spacing="14.0" style="-fx-padding: 12;">
-            <TableView fx:id="auctionTable" VBox.vgrow="ALWAYS">
+        <VBox spacing="15.0" style="-fx-background-color: white; -fx-padding: 20 25; -fx-background-radius: 8;">
+            <Label text="📦 Quản lý tất cả phiên đấu giá" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #1976D2;"/>
+            <Separator style="-fx-padding: 0;"/>
+
+            <TableView fx:id="auctionTable" VBox.vgrow="ALWAYS" style="-fx-background-color: transparent; -fx-control-inner-background: white; -fx-border-color: transparent;">
                 <columns>
-                    <TableColumn fx:id="itemNameColumn" prefWidth="230.0" text="Vật phẩm"/>
-                    <TableColumn fx:id="sellerColumn" prefWidth="150.0" text="Seller"/>
-                    <TableColumn fx:id="categoryColumn" prefWidth="120.0" text="Loại"/>
-                    <TableColumn fx:id="currentPriceColumn" prefWidth="140.0" text="Giá hiện tại"/>
-                    <TableColumn fx:id="statusColumn" prefWidth="120.0" text="Trạng thái"/>
-                    <TableColumn fx:id="endTimeColumn" prefWidth="220.0" text="Kết thúc lúc"/>
+                    <TableColumn fx:id="itemNameColumn" prefWidth="260.0" text="Vật phẩm"/>
+                    <TableColumn fx:id="sellerColumn" prefWidth="160.0" text="Người bán (Seller)"/>
+                    <TableColumn fx:id="categoryColumn" prefWidth="130.0" text="Loại"/>
+                    <TableColumn fx:id="currentPriceColumn" prefWidth="150.0" text="Giá hiện tại ($)"/>
+                    <TableColumn fx:id="statusColumn" prefWidth="130.0" text="Trạng thái"/>
+                    <TableColumn fx:id="endTimeColumn" prefWidth="230.0" text="Kết thúc lúc"/>
                 </columns>
             </TableView>
-            <HBox spacing="10.0">
-                <Button fx:id="startButton" text="Mở phiên" onAction="#handleStartAuction"/>
-                <Button fx:id="endButton" text="Kết thúc sớm" onAction="#handleEndAuction"/>
-                <Button fx:id="cancelButton" text="Hủy phiên" onAction="#handleCancelAuction"/>
+
+            <HBox spacing="15.0" alignment="CENTER_LEFT">
+                <Button fx:id="startButton" text="▶️ Mở phiên" onAction="#handleStartAuction"
+                        style="-fx-background-color: #10B981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20; -fx-background-radius: 4; -fx-cursor: hand;"/>
+
+                <Button fx:id="endButton" text="⏹️ Kết thúc sớm" onAction="#handleEndAuction"
+                        style="-fx-background-color: white; -fx-text-fill: #F59E0B; -fx-border-color: #F59E0B; -fx-border-radius: 4; -fx-background-radius: 4; -fx-font-weight: bold; -fx-padding: 8 20; -fx-cursor: hand;"/>
+
+                <Region HBox.hgrow="ALWAYS" />
+
+                <Button fx:id="cancelButton" text="❌ Hủy phiên" onAction="#handleCancelAuction"
+                        style="-fx-background-color: #FEF2F2; -fx-text-fill: #DC2626; -fx-border-color: #F87171; -fx-border-radius: 4; -fx-background-radius: 4; -fx-font-weight: bold; -fx-padding: 8 20; -fx-cursor: hand;"/>
             </HBox>
         </VBox>
     </center>
+
     <bottom>
-        <HBox spacing="10.0" alignment="CENTER_RIGHT" style="-fx-padding: 12;">
-            <Button text="Quay lại danh sách vật phẩm" onAction="#handleOpenMarket"/>
+        <HBox alignment="CENTER_RIGHT" style="-fx-background-color: white; -fx-padding: 15 25; -fx-background-radius: 8;">
+            <BorderPane.margin>
+                <Insets top="15.0"/>
+            </BorderPane.margin>
+            <Button text="⬅️ Quay lại danh sách vật phẩm" onAction="#handleOpenMarket"
+                    style="-fx-background-color: #FF6F00; -fx-text-fill: white; -fx-font-weight: bold; -fx-font-size: 14px; -fx-padding: 10 20; -fx-background-radius: 4; -fx-cursor: hand;"/>
         </HBox>
     </bottom>
+
 </BorderPane>
